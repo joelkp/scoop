@@ -1,0 +1,2 @@
+Object.o: Object.c ../include/scoop/Object.h ../include/scoop/API.h
+error.o: error.c ../include/scoop/API.h

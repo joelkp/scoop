@@ -1,0 +1,8 @@
+Object-ExtendedThing.o: Object-ExtendedThing.c Object-ExtendedThing.h \
+ ../include/scoop/BEGIN.h ../include/scoop/API.h Object-Thing.h \
+ ../include/scoop/Object.h ../include/scoop/END.h
+Object-Thing.o: Object-Thing.c Object-Thing.h ../include/scoop/BEGIN.h \
+ ../include/scoop/API.h ../include/scoop/Object.h ../include/scoop/END.h
+Object-test.o: Object-test.c Object-ExtendedThing.h \
+ ../include/scoop/BEGIN.h ../include/scoop/API.h Object-Thing.h \
+ ../include/scoop/Object.h ../include/scoop/END.h

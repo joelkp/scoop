@@ -1,0 +1,15 @@
+Brief sketches for possible design extensions:
+
+- Virtual variables - either using the init/reset function, or a static default
+  instance to be copied. The latter can be done in the init/reset function,
+  which also allows greater flexibility - using functions - and so the latter
+  may be best. Virtual variables may be either stored in the vtab (given
+  additional information, separating size and number of functions) before (or
+  after) the functions, or pointed to by an added pointer. (No other good ideas
+  at present.)
+- Dynamic subtyping - routine copies the class description and makes the
+  original the parent, also marking it as dynamic. Deallocated explicitly.
+- Optional instance-tracking - optionally, a type may store the instances, and
+  upon explicit deallocation, or "cleaning" for non-dynamic types, the
+  instances are destroyed.
+

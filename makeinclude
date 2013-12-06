@@ -1,0 +1,81 @@
+# SCOOP makeinclude - common definitions for all SCOOP makefiles
+#
+# Copyright (c) 2010, 2011, 2013 Joel K. Pettersson
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+
+VERSION		= "1.0.0"
+
+INCLUDEDIR	= $(MAINDIR)include/
+OBJDIR		= $(MAINDIR)obj/
+LIBDIR		= $(MAINDIR)lib/
+LIBTARGET	= static # set blank to skip static library build
+DSOTARGET	= shared # set blank to skip shared library build
+
+# programs used
+CC		= gcc
+MAKEDEPEND	= $(CC) -MM -DMAKEDEPEND
+RANLIB		= ranlib
+LN		= ln -s
+RM		= rm -f
+RMDIR		= rm -rf
+MKDIR		= mkdir -p
+LIBCOMMAND	= ar cr
+DSOCOMMAND	= $(CC) $(LIBS) -shared -fPIC -o
+CFLAGS		= -I$(INCLUDEDIR) -W -Wall -Wunused -O2 -fPIC
+LFLAGS		= -L$(LIBDIR) -Wl,-rpath,$(LIBDIR)
+LIBCFLAGS	= $(CFLAGS)
+DSOCFLAGS	= $(CFLAGS)
+OBJEXT		= .o
+LIBOBJEXT	= .static-o
+DSOOBJEXT	= .shared-o
+
+# Windows *
+ifdef COMSPEC
+ LIBPREFIX	=
+ LIBSUFFIX	= .a
+ DSOPREFIX	=
+ DSOSUFFIX	= .dll
+ EXEEXT		= .exe
+# *nix
+else
+ LIBPREFIX	= lib
+ LIBSUFFIX	= .a
+ DSOPREFIX	= lib
+ DSOSUFFIX	= .so
+ EXEEXT		=
+endif
+
+.SILENT:
+.SUFFIXES:	.c .h .o .static-o .shared-o
+
+
+.c.static-o:
+	echo "Compiling $< for static library..."
+	$(CC) $(LIBCFLAGS) -c $< -o $@
+
+.c.shared-o:
+	echo "Compiling $< for shared library..."
+	$(CC) $(DSOCFLAGS) -c $< -o $@
+
+.c.o:
+	echo "Compiling $<..."
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# EOF
