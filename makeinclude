@@ -29,7 +29,7 @@ LIBTARGET	= static # set blank to skip static library build
 DSOTARGET	= shared # set blank to skip shared library build
 
 # programs used
-CC		= gcc
+CC		= cc
 MAKEDEPEND	= $(CC) -MM -DMAKEDEPEND
 RANLIB		= ranlib
 LN		= ln -s
