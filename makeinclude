@@ -47,20 +47,20 @@ LIBOBJEXT	= .static-o
 DSOOBJEXT	= .shared-o
 
 # Windows *
-ifdef COMSPEC
+.ifdef COMSPEC
  LIBPREFIX	=
  LIBSUFFIX	= .a
  DSOPREFIX	=
  DSOSUFFIX	= .dll
  EXEEXT		= .exe
 # *nix
-else
+.else
  LIBPREFIX	= lib
  LIBSUFFIX	= .a
  DSOPREFIX	= lib
  DSOSUFFIX	= .so
  EXEEXT		=
-endif
+.endif
 
 .SILENT:
 .SUFFIXES:	.c .h .o .static-o .shared-o
