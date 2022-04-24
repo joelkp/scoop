@@ -20,7 +20,9 @@ The core of the library is the Object module, which provides support for:
 - Virtual functions
 - Explicit RTTI checks
 
-See the header files for the library for further details.
+See the header files for the library for further details. The library can be built with `make` on many GNU/Linux systems, and with `gmake` on BSDs.
+
+This library was made in 2013, as a clean repackaging of something I'd experimented with 2010-2011. In-between, in 2012 I wrote [an article on object-oriented C, later reworked and expanded](https://joelkp.frama.io/blog/c-struct-inherit.html). Currently, this proof-of-concept library is not actively developed further, but if of interest further work could go into it. It's so small and simple that modified copies of the code are more likely to end up in future software of mine with different naming.
 
 Licensing
 ---------
