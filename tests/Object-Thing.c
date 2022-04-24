@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-/* This turns FL_TYPE into an alias for scoThing when including the first
+/* This turns SCO_TYPE into an alias for scoThing when including the first
  * header - Object-Thing.h - but not otherwise.
  */
 #define SCO_MODULE scoThing

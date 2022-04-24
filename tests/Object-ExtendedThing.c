@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-/* This turns FL_TYPE into an alias for scoExtendedThing when including
+/* This turns SCO_TYPE into an alias for scoExtendedThing when including
  * the first header - Object-ExtendedThing.h - but not otherwise, not even
  * in the nested include of Object-Thing.h.
  */
