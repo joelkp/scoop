@@ -35,7 +35,7 @@ static void sco_Object_CD_init(scoObject_CD *o)
 {
 	void (**vtab)() = (void (**)()) &o->vtab,
 			 (**super_vtab)() = 0;
-	uint i = 0, max;
+	unsigned int i = 0, max;
 	if (o->super) {
 		if (!o->super->done)
 			sco_Object_CD_init((scoObject_CD*)o->super);
