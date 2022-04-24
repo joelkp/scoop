@@ -70,5 +70,3 @@ void (*sco_error)(const char *format, ...) = default_warning;
 void (*sco_fatal)(const char *format, ...) = default_fatal;
 
 #endif
-
-/* EOF */

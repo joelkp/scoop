@@ -39,18 +39,16 @@ void sco_Thing_do_bar_(scoThing *o)
 	puts("do_bar (scoThing version)");
 }
 
-static void scoThing_vtinit(scoThing_CD *o)
+static void scoThing_virtinit(scoThing_Meta *o)
 {
-	scoThing_VT *vt = &o->vtab;
+	scoThing_Virt *vt = &o->virt;
 	vt->do_foo = sco_Thing_do_foo_;
 	vt->do_bar = sco_Thing_do_bar_;
 }
-SCO_CLASSDEF(scoThing, scoNull, 0, scoThing_vtinit);
+SCO_CLASSDEF(scoThing, scoNull, 0, scoThing_virtinit);
 
 SCO_CLASSCTOR(scoThing, sco_Thing, (scoThing *o), (o), o)
 {
 	o->x = 10;
 	return 1;
 }
-
-/* EOF */

@@ -172,4 +172,3 @@ SCO_API extern void (*sco_fatal)(const char *msg, ...);
 #ifdef __cplusplus
 }
 #endif
-/* EOF */

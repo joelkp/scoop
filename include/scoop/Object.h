@@ -1,6 +1,6 @@
 /* SCOOP Object module
  *
- * Copyright (c) 2010, 2011, 2013 Joel K. Pettersson
+ * Copyright (c) 2010, 2011, 2013, 2022 Joel K. Pettersson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -55,7 +55,7 @@ extern "C" {
    with memory allocation and initialization of the instance.
 
    There is no need to "register" a class before allocating an instance. The
-   class description will become fully initialized the first time an instance
+   meta type will become fully initialized the first time an instance
    is allocated.
 
    A note on the SCOOP API naming convention:
@@ -79,50 +79,48 @@ extern "C" {
  */
 
 /**
- * Declare a SCOOP type without a class description. (And so without
- * support for sco_delete()/sco_finalize(), SCOOP RTTI and virtual
- * functions.)
+ * Declare a SCOOP type *without* a meta type, i.e. a plain struct.
+ * (There is no support for passing such data to sco_delete(),
+ * sco_finalize(), or trying to use SCOOP RTTI or virtual functions.)
  *
- * \p Struct is the name of the type to declare. The existence of a
+ * \p Name is the name of the type to declare. The existence of a
  * macro, having the same name except with an appended underscore, is
  * expected. That macro should list all the members of the type, the
  * way they are listed within a struct declaration; it will be
  * referenced as a means of declaring the type.
  *
- * A member list macro can reference one other SCOstruct() type's
- * member list macro at the beginning, giving rise to single
+ * A member list macro can reference one other SCOstruct()
+ * type's member list macro at the beginning, giving rise to single
  * inheritance and allowing type-cast compatibility.
  */
-#define SCOstruct(Struct) \
-typedef struct Struct { Struct##_ } Struct
+#define SCOstruct(Name) \
+typedef struct Name { Name##_ } Name
 
 /*
  * SCOOP OOC full-fledged classes.
  */
 
 /**
- * Declare a SCOOP type having a class description. (And so having
- * support for sco_delete()/sco_finalize(), SCOOP RTTI and the vtable
- * system.) These are referred to as classes. A \a classdesc pointer to the
- * class description is accordingly included at the beginning of the data
- * structure.
+ * Declare a SCOOP type with an associated meta type, i.e. a class.
+ * (Such data can be passed to sco_delete(), sco_finalize(), and the
+ * SCOOP RTTI and virtual table system used.) Each such struct begins
+ * with a \a meta pointer to its meta type.
  *
- * \p Class is the name of the type to declare. The existence of a
+ * \p Name is the name of the type to declare. The existence of a
  * macro, having the same name except with an appended underscore, is
  * expected. That macro should list all the members of the type, the
  * way they are listed within a struct declaration; it will be
  * referenced as a means of declaring the type.
  *
- * A member list macro can reference one other
- * SCOclass()/SCOclasstype() type's member list macro at the
- * beginning, giving rise to single inheritance and allowing type-cast
- * compatibility.
+ * A member list macro can reference one other SCOclass()/SCOclasstype()
+ * type's member list macro at the beginning, giving rise to single
+ * inheritance and allowing type-cast compatibility.
  *
- * \ref SCOclass() combines this and \ref SCOclassdesc() into a single
- * "keyword".
+ * \ref SCOclass() combines this and \ref SCOmeta() into a single
+ * keyword-like macro.
  */
-#define SCOclasstype(Class) \
-  typedef struct Class { const struct Class##_CD *classdesc; Class##_ } Class
+#define SCOclasstype(Name) \
+typedef struct Name { const struct Name##_Meta *meta; Name##_ } Name
 
 /**
  * Class destructor function pointer type.
@@ -130,9 +128,9 @@ typedef struct Struct { Struct##_ } Struct
 typedef void (*scoDtor)(void *o);
 
 /**
- * Declare a class description for a type declared with SCOclass();
+ * Declare a meta type for a type declared with SCOclass();
  * the name of this type seldom needs to be explicitly referenced,
- * but is the same as that of the class with _CD appended.
+ * but is the same as that of the class with _Meta appended.
  *
  * This version \a does \a not forward-declare the corresponding global
  * instance made by SCO_CLASSDEF() for symbol export.
@@ -145,28 +143,28 @@ typedef void (*scoDtor)(void *o);
  * That macro can reference one other such macro at the beginning of
  * its contents for (single) inheritance - and this must be done when
  * inheriting from another class. The resulting list of function
- * pointers form the contents of the vtable data structure for the
- * class, named the same as the class except with _VT appended.
+ * pointers form the contents of the virtual table data structure for the
+ * class, named the same as the class except with _Virt appended.
  *
  * _SCOclass() combines this and SCOclasstype() into a single
  * "keyword".
  */
-#define _SCOclassdesc(Class) \
-typedef struct Class##_VT { Class##__ } Class##_VT; \
-typedef struct Class##_CD { \
-	const struct scoObject_CD *super; \
+#define _SCOmeta(Class) \
+typedef struct Class##_Virt { Class##__ } Class##_Virt; \
+typedef struct Class##_Meta { \
+	const struct scoObject_Meta *super; \
 	size_t size; \
 	unsigned short vnum; \
 	unsigned char done; \
 	const char *name; \
-	scoDtor vtinit; /* vtab initialization function; passed classdesc */ \
-	scoDtor dtor; /* not counted in vnum (is not part of vtab) */ \
-	Class##_VT vtab; \
-} Class##_CD
+	scoDtor vtinit; /* virtual table init function; passed meta */ \
+	scoDtor dtor; /* not counted in vnum (is not part of virt) */ \
+	Class##_Virt virt; \
+} Class##_Meta
 
-/** Declare a class description for a type declared with SCOclass().
+/** Declare a meta type for a type declared with SCOclass().
   * the name of this type seldom needs to be explicitly referenced,
-  * but is the same as that of the class with _CD appended.
+  * but is the same as that of the class with _Meta appended.
   *
   * This version \a will \a also forward-declare the corresponding global
   * instance made by SCO_CLASSDEF() for symbol export, as is done for
@@ -180,46 +178,46 @@ typedef struct Class##_CD { \
   * That macro can reference one other such macro at the beginning of
   * its contents for (single) inheritance - and this must be done when
   * inheriting from another class. The resulting list of function
-  * pointers form the contents of the vtable data structure for the
-  * class, named the same as the class except with _VT appended.
+  * pointers form the contents of the virtual table data structure for the
+  * class, named the same as the class except with _Virt appended.
   *
   * SCOclass() combines this and SCOclasstype() into a single "keyword".
   */
-#define SCOclassdesc(Class) \
-_SCOclassdesc(Class); \
-SCO_USERAPI extern Class##_CD _##Class##_cd
+#define SCOmeta(Class) \
+_SCOmeta(Class); \
+SCO_USERAPI extern Class##_Meta _##Class##_meta
 
-/** Get the global class description of the \p Class named.
+/** Get the global meta type instance of the \p Class named.
   *
   * This requires it to have been either forward-declared with
-  * SCOclassdesc() (as is done for public APIs) when the class was
+  * SCOmeta() (as is done for public APIs) when the class was
   * defined - or to have been otherwise defined earlier in the same
   * module if part of a non-public API.
   *
   * Supplying the keyword \a scoNull as the class will produce a NULL
   * pointer.
   */
-#define sco_classdescof(Class) (&(_##Class##_cd))
+#define sco_metaof(Class) (&(_##Class##_meta))
 
-/** This combines SCOclasstype() and _SCOclassdesc() to declare a class
-  * and its class description at once.
+/** This combines SCOclasstype() and _SCOmeta() to declare a class
+  * and its meta type at once.
   * \see SCOclasstype()
-  * \see _SCOclassdesc()
+  * \see _SCOmeta()
   */
 #define _SCOclass(Class) \
 SCOclasstype(Class); \
-_SCOclassdesc(Class)
+_SCOmeta(Class)
 
-/** This combines SCOclasstype() and SCOclassdesc() to declare a class
-  * and its class description at once - and forward-declare the symbol of
-  * the SCO_CLASSDEF() definition of the global class description for
+/** This combines SCOclasstype() and SCOmeta() to declare a class
+  * and its meta type at once - and forward-declare the symbol of
+  * the SCO_CLASSDEF() definition of the global meta type for
   * export, as is done for public APIs.
   * \see SCOclasstype()
-  * \see SCOclassdesc()
+  * \see SCOmeta()
   */
 #define SCOclass(Class) \
 SCOclasstype(Class); \
-SCOclassdesc(Class)
+SCOmeta(Class)
 
 /** Use to declare a pair of allocation and constructor functions for a
   * class if they do not take variable arguments. They will be named
@@ -245,12 +243,12 @@ SCO_USERAPI unsigned char FunctionName##_ctor Parlist
   * The FunctionName_new() function will first allocate zero'd
   * memory if its memory pointer argument is zero, otherwise zero and
   * (re)use memory. If allocation is successful, it will thereafter set
-  * the class description, and then call the corresponding
+  * the meta type, and then call the corresponding
   * FunctionName_ctor() function. If everything succeeds, the address of
   * the instance is returned, otherwise NULL is returned.
   *
   * The FunctionName_ctor() function is a constructor which takes a
-  * valid memory block - zero'd and with the correct class description
+  * valid memory block - zero'd and with the correct meta type
   * set. Its body is to be defined immediately after the macro
   * invocation, beginning with an opening curly brace; it should return
   * non-zero if construction successful, zero if construction failed.
@@ -259,8 +257,8 @@ SCO_USERAPI unsigned char FunctionName##_ctor Parlist
   * constructor for the superclass at the beginning of the function.
   *
   * A caveat: Since subclass constructors call superclass constructors,
-  * and the class description remains that of the instantiated class,
-  * this means a constructor might be called with the class description
+  * and the meta type remains that of the instantiated class,
+  * this means a constructor might be called with the meta type
   * of a derived class. This affects the definition of virtual
   * functions - so a constructor should not use the virtual function
   * table when it depends on a specific version of the function it calls.
@@ -276,9 +274,9 @@ unsigned char FunctionName##_ctor Parlist; \
 Class* FunctionName##_new Parlist \
 { \
 	void *SCO_CLASSCTOR__mem = (o); \
-	(o) = _sco_new(SCO_CLASSCTOR__mem, sco_classdescof(Class)); \
+	(o) = _sco_new(SCO_CLASSCTOR__mem, sco_metaof(Class)); \
 	if ((o) && !FunctionName##_ctor Arglist) { \
-		sco_set_classdescof((o), scoNull); \
+		sco_set_metaof((o), scoNull); \
 		if (!SCO_CLASSCTOR__mem) free(o); \
 		return 0; \
 	} \
@@ -286,7 +284,7 @@ Class* FunctionName##_new Parlist \
 } \
 unsigned char FunctionName##_ctor Parlist
 
-/** Define the global instance of the class description for the class.
+/** Define the global instance of the meta type for the class.
   * (You can use the keyword \a static before invoking this macro when not
   * defining a class part of a public API.)
   *
@@ -298,21 +296,21 @@ unsigned char FunctionName##_ctor Parlist
   * called up the superclass chain from the object's class to the base
   * class.
   *
-  * \p vtinit should be a function setting the pointers in the vtab
+  * \p vtinit should be a function setting the pointers in the virt
   * structure for any virtual functions (re)defined by the class. If no
   * virtual functions are (re)defined by the class, it can be NULL. If
   * provided, it will be called upon creation of the first instance of the
-  * class, and given the class description as the argument. It needn't (and
+  * class, and given the meta type as the argument. It needn't (and
   * shouldn't) change any other pointers: definitions inherited from the
   * superclass are automatically copied, and "pure virtual" (i.e. as-yet
   * undefined) functions are automatically defined to prompt a fatal error
   * (using \ref sco_fatal()) if called.
   */
 #define SCO_CLASSDEF(Class, Superclass, dtor, vtinit) \
-struct Class##_CD _##Class##_cd = { \
-	(scoObject_CD*)sco_classdescof(Superclass), \
+struct Class##_Meta _##Class##_meta = { \
+	(scoObject_Meta*)sco_metaof(Superclass), \
 	sizeof(Class), \
-	(sizeof(Class##_VT) / sizeof(void (*)())), \
+	(sizeof(Class##_Virt) / sizeof(void (*)())), \
 	0, \
 	#Class, \
 	(scoDtor)vtinit, \
@@ -330,7 +328,7 @@ struct Class##_CD _##Class##_cd = { \
   */
 #define scoObject__
 
-/** Dummy class containing only the class description pointer; a
+/** Dummy class containing only the meta type pointer; a
   * scoObject pointer and/or cast may be used to access the basic
   * (common) type information of any object of a class declared with
   * SCOclass().
@@ -339,49 +337,49 @@ struct Class##_CD _##Class##_cd = { \
   */
 SCOclasstype(scoObject);
 
-/** Dummy class description type containing only the common type
-  * information; a scoObject_CD pointer and/or cast may be used to
+/** Dummy meta type type containing only the common type
+  * information; a scoObject_Meta pointer and/or cast may be used to
   * access the information common to any type, ie. all except any
   * virtual methods present.
   *
   * scoObject is just a dummy definition - not a valid class name!
   */
-_SCOclassdesc(scoObject);
+_SCOmeta(scoObject);
 
 #ifndef SCO_DOXYGEN
-/* This is a dummy class description allowing the keyword \a scoNull
+/* This is a dummy meta type allowing the keyword \a scoNull
  * to be specified as the supertype for base classes in SCO_CLASSDEF().
  */
-# define _scoNull_cd (*(scoObject_CD*)(0))
+# define _scoNull_meta (*(scoObject_Meta*)(0))
 #endif
 
 /** Assuming \p mem points to a valid object, retrieves the class
   * description through typecasting, allowing access to the
   * information common to all classes.
   */
-#define sco_classdesc(mem) \
-	((scoObject_CD*)((scoObject*)mem)->classdesc)
+#define sco_meta(mem) \
+	((scoObject_Meta*)((scoObject*)mem)->meta)
 
 /** Assuming \p mem points to a valid object or to an object under
-  * construction, changes the class description to \p _classdesc.
+  * construction, changes the meta type to \p _meta.
   */
-#define sco_set_classdesc(mem, _classdesc) \
-	((void)(((scoObject*)(mem))->classdesc = (_classdesc)))
+#define sco_set_meta(mem, _meta) \
+	((void)(((scoObject*)(mem))->meta = (_meta)))
 
 /** Assuming \p mem points to a valid object or to an object under
-  * construction, changes the class description to that of the
+  * construction, changes the meta type to that of the
   * \p Class named.
   *
   * Supplying the keyword \a scoNull as the class will set it to a NULL
   * pointer.
   */
-#define sco_set_classdescof(mem, Class) \
-	((void)(((scoObject*)mem)->classdesc = (scoObject_CD*)sco_classdescof(Class)))
+#define sco_set_metaof(mem, Class) \
+	((void)(((scoObject*)mem)->meta = (scoObject_Meta*)sco_metaof(Class)))
 
-/** Get the vtable (class-specific) of an object.
+/** Get the virtual table (class-specific) of an object.
   */
-#define sco_vtab(o) \
-	(&(o)->classdesc->vtab)
+#define sco_virtab(o) \
+	(&(o)->meta->virt)
 
 /** Allocation method used in instance construction functions,
   * typically in the wrapper around the initialization
@@ -390,16 +388,16 @@ _SCOclassdesc(scoObject);
   * macro around this)
   *
   * If \a mem is zero, returns a new, zero'd allocation of
-  * \a classdesc->size; if non-zero, zeroes \p mem and returns
+  * \a meta->size; if non-zero, zeroes \p mem and returns
   * it.
   *
   * If not done, the final run-time initialization of the type
   * description will be performed.
   *
-  * The \a classdesc pointer of the new object is set to \p
-  * classdesc.
+  * The \a meta pointer of the new object is set to \p
+  * meta.
   */
-SCO_API void* _sco_new(void *mem, void *classdesc);
+SCO_API void* _sco_new(void *mem, void *meta);
 
 /** Destroys object and frees memory, first calling every destructor in
   * the class hierarchy from present type to base type.
@@ -422,35 +420,33 @@ SCO_API void sco_finalize(void *o);
   * - sco_of_class()
   * - sco_of_subclass()
   *
-  * It checks if \p subclassdesc is a subclass of \p classdesc.
+  * It checks if \p submeta is a subclass of \p meta.
   * Returns 1 if subclass, 0 if same class, -1 if neither.
   */
-SCO_API int _sco_rtticheck(const void *subclassdesc, const void *classdesc);
+SCO_API int _sco_rtticheck(const void *submeta, const void *meta);
 
 /** Checks if the named \p Subclass is a subclass of the named \p Class.
   * Returns 1 if subclass, 0 if same class, -1 if neither.
   */
 #define sco_subclass(Subclass, Class) \
-	_sco_rtticheck(sco_classdescof(Subclass), sco_classdescof(Class))
+	_sco_rtticheck(sco_metaof(Subclass), sco_metaof(Class))
 
 /** Checks if the named \p Superclass is a superclass of the named \p Class.
   * Returns 1 if superclass, 0 if same class, -1 if neither.
   */
 #define sco_superclass(Superclass, Class) \
-	_sco_rtticheck(sco_classdescof(Class), sco_classdescof(Superclass))
+	_sco_rtticheck(sco_metaof(Class), sco_metaof(Superclass))
 
 /** Checks if \p o is an instance of \p Class or of a class derived
     from it. */
 #define sco_of_class(o, Class) \
-	(_sco_rtticheck((o)->classdesc, sco_classdescof(Class)) >= 0)
+	(_sco_rtticheck((o)->meta, sco_metaof(Class)) >= 0)
 
 /** Checks if \p o is of a type derived from \p Class. */
 #define sco_of_subclass(o, Class) \
-	(_sco_rtticheck((o)->classdesc, sco_classdescof(Class)) > 0)
+	(_sco_rtticheck((o)->meta, sco_metaof(Class)) > 0)
 
 #ifdef __cplusplus
 }
 #endif
 #endif
-
-/* EOF */

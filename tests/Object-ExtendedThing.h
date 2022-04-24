@@ -52,4 +52,3 @@ void sco_ExtendedThing_do_foo_(SCO_TYPE *o);
 #include <scoop/END.h>
 
 #endif
-/* EOF */

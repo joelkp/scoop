@@ -35,12 +35,12 @@ void sco_ExtendedThing_do_foo_(scoExtendedThing *o)
 	printf("do_foo (scoExtendedThing version): %d, %f\n", o->x, o->y);
 }
 
-static void scoExtendedThing_vtinit(scoExtendedThing_CD *o)
+static void scoExtendedThing_virtinit(scoExtendedThing_Meta *o)
 {
-	scoExtendedThing_VT *vt = &o->vtab;
+	scoExtendedThing_Virt *vt = &o->virt;
 	vt->do_foo = sco_ExtendedThing_do_foo_;
 }
-SCO_CLASSDEF(scoExtendedThing, scoThing, 0, scoExtendedThing_vtinit);
+SCO_CLASSDEF(scoExtendedThing, scoThing, 0, scoExtendedThing_virtinit);
 
 SCO_CLASSCTOR(scoExtendedThing, sco_ExtendedThing, (scoExtendedThing *o), (o), o)
 {
@@ -48,5 +48,3 @@ SCO_CLASSCTOR(scoExtendedThing, sco_ExtendedThing, (scoExtendedThing *o), (o), o
 	o->y = 42.f;
 	return 1;
 }
-
-/* EOF */

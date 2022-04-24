@@ -86,5 +86,3 @@ extern "C" {
 #  error "Cannot handle includes nested more than 256 levels!"
 # endif
 #endif
-
-/* EOF */

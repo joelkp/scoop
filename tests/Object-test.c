@@ -47,7 +47,7 @@ int main()
 	 * allocation.
 	 */
 	sco_finalize(thing);
-	sco_set_classdescof(thing, scoThing);
+	sco_set_metaof(thing, scoThing);
 	if (sco_Thing_ctor(thing))
 		puts("'thing' reconstructed");
 

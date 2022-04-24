@@ -1,6 +1,6 @@
 /* SCOOP Object module
  *
- * Copyright (c) 2010, 2011, 2013 Joel K. Pettersson
+ * Copyright (c) 2010, 2011, 2013, 2022 Joel K. Pettersson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,63 +30,63 @@ static void pure_virtual(void)
 	sco_fatal("Error: pure virtual SCOOP method called!");
 }
 
-/* used to initialize all class descriptions */
-static void sco_Object_CD_init(scoObject_CD *o)
+/* used to initialize all meta types */
+static void sco_Object_Meta_init(scoObject_Meta *o)
 {
-	void (**vtab)() = (void (**)()) &o->vtab,
-			 (**super_vtab)() = 0;
+	void (**virt)() = (void (**)()) &o->virt,
+			 (**super_virtab)() = 0;
 	unsigned int i = 0, max;
 	if (o->super) {
 		if (!o->super->done)
-			sco_Object_CD_init((scoObject_CD*)o->super);
-		super_vtab = (void (**)()) &o->super->vtab;
+			sco_Object_Meta_init((scoObject_Meta*)o->super);
+		super_virtab = (void (**)()) &o->super->virt;
 		for (max = o->super->vnum; i < max; ++i)
-			if (!vtab[i]) vtab[i] = super_vtab[i];
+			if (!virt[i]) virt[i] = super_virtab[i];
 	}
 	if (o->vtinit)
 		o->vtinit(o);
 	for (max = o->vnum; i < max; ++i)
-		if (!vtab[i]) vtab[i] = pure_virtual;
+		if (!virt[i]) virt[i] = pure_virtual;
 	o->done = 1;
 }
 
-void* _sco_new(void *mem, void *classdesc)
+void* _sco_new(void *mem, void *_meta)
 {
-	scoObject_CD *cd = classdesc;
+	scoObject_Meta *meta = _meta;
 	if (!mem) {
-		if (!(mem = calloc(1, cd->size)))
+		if (!(mem = calloc(1, meta->size)))
 			return 0;
 	} else {
-		memset(mem, 0, cd->size);
+		memset(mem, 0, meta->size);
 	}
-	if (!cd->done) sco_Object_CD_init(cd);
-	sco_set_classdesc(mem, cd);
+	if (!meta->done) sco_Object_Meta_init(meta);
+	sco_set_meta(mem, meta);
 	return mem;
 }
 
 void sco_delete(void *o)
 {
-	const scoObject_CD *cd = sco_classdesc(o);
+	const scoObject_Meta *meta = sco_meta(o);
 	do {
-		if (cd->dtor) cd->dtor(o);
-		cd = cd->super;
-	} while (cd);
+		if (meta->dtor) meta->dtor(o);
+		meta = meta->super;
+	} while (meta);
 	free(o);
 }
 
 void sco_finalize(void *o)
 {
-	const scoObject_CD *cd = sco_classdesc(o);
+	const scoObject_Meta *meta = sco_meta(o);
 	do {
-		if (cd->dtor) cd->dtor(o);
-		cd = cd->super;
-	} while (cd);
-	sco_set_classdescof(o, scoNull);
+		if (meta->dtor) meta->dtor(o);
+		meta = meta->super;
+	} while (meta);
+	sco_set_metaof(o, scoNull);
 }
 
-int _sco_rtticheck(const void *subclassdesc, const void *classdesc)
+int _sco_rtticheck(const void *sub_meta, const void *meta)
 {
-	const scoObject_CD *subclass = subclassdesc, *class = classdesc;
+	const scoObject_Meta *subclass = sub_meta, *class = meta;
 	if (subclass == class) return 0;
 	do {
 		subclass = subclass->super;
@@ -94,5 +94,3 @@ int _sco_rtticheck(const void *subclassdesc, const void *classdesc)
 	} while (subclass);
 	return -1;
 }
-
-/* EOF */

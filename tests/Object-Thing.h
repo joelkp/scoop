@@ -51,10 +51,10 @@ SCOclassctor(scoThing, sco_Thing, (SCO_TYPE *o));
  */
 
 #define sco_Thing_do_foo(o) \
-	(o)->classdesc->vtab.do_foo(o)
+	(o)->meta->virt.do_foo(o)
 
 #define sco_Thing_do_bar(o) \
-	(o)->classdesc->vtab.do_bar(o)
+	(o)->meta->virt.do_bar(o)
 
 /*
  * The scoThing versions of virtual functions, for direct calls:
@@ -67,4 +67,3 @@ void sco_Thing_do_bar_(SCO_TYPE *o);
 #include <scoop/END.h>
 
 #endif
-/* EOF */
