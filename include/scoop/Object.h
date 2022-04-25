@@ -200,7 +200,7 @@ SCO_USERAPI extern Class##_Meta _##Class##_meta
   * defined - or to have been otherwise defined earlier in the same
   * module if part of a non-public API.
   *
-  * Supplying the keyword \a scoNull as the class will produce a NULL
+  * Supplying the keyword \a scoNone as the class will produce a NULL
   * pointer.
   */
 #define sco_metaof(Class) (&(_##Class##_meta))
@@ -282,7 +282,7 @@ Class* FunctionName##_new Parlist \
 	void *SCO_CTOR__mem = (o); \
 	(o) = sco_raw_new(SCO_CTOR__mem, sco_metaof(Class)); \
 	if ((o) && !FunctionName##_ctor Arglist) { \
-		sco_set_metaof((o), scoNull); \
+		sco_set_metaof((o), scoNone); \
 		if (!SCO_CTOR__mem) free(o); \
 		return 0; \
 	} \
@@ -294,7 +294,7 @@ unsigned char FunctionName##_ctor Parlist
   * (You can use the keyword \a static before invoking this macro when not
   * defining a class part of a public API.)
   *
-  * \p Superclass should be \a scoNull for base classes, otherwise the name
+  * \p Superclass should be \a scoNone for base classes, otherwise the name
   * of the superclass.
   *
   * \p dtor should be the destructor function for the class if it defines
@@ -353,10 +353,10 @@ SCOclasstype(scoObject);
 _SCOmetatype(scoObject);
 
 #ifndef SCO_DOXYGEN
-/* This is a dummy meta type allowing the keyword \a scoNull
+/* This is a dummy meta type allowing the keyword \a scoNone
  * to be specified as the supertype for base classes in SCO_META().
  */
-# define _scoNull_meta (*(scoObject_Meta*)(0))
+# define _scoNone_meta (*(scoObject_Meta*)(0))
 #endif
 
 /** Assuming \p mem points to a valid object, retrieves the class
@@ -376,7 +376,7 @@ _SCOmetatype(scoObject);
   * construction, changes the meta type to that of the
   * \p Class named.
   *
-  * Supplying the keyword \a scoNull as the class will set it to a NULL
+  * Supplying the keyword \a scoNone as the class will set it to a NULL
   * pointer.
   */
 #define sco_set_metaof(mem, Class) \

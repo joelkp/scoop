@@ -80,7 +80,7 @@ void sco_finalize(void *o)
 		if (meta->dtor) meta->dtor(o);
 		meta = meta->super;
 	} while (meta);
-	sco_set_metaof(o, scoNull);
+	sco_set_metaof(o, scoNone);
 }
 
 int sco_rtticheck(const void *submeta, const void *meta)
