@@ -42,7 +42,7 @@
 
 SCOclass(scoThing);
 
-SCOclassctor(scoThing, sco_Thing, (SCO_TYPE *o));
+SCOctor(scoThing, sco_Thing, (SCO_TYPE *o));
 
 /*
  * Macros to make virtual functions look like plain functions.

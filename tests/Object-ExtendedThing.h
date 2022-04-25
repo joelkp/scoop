@@ -40,7 +40,7 @@
 
 SCOclass(scoExtendedThing);
 
-SCOclassctor(scoExtendedThing, sco_ExtendedThing, (SCO_TYPE *o));
+SCOctor(scoExtendedThing, sco_ExtendedThing, (SCO_TYPE *o));
 
 /*
  * The scoExtendedThing versions of virtual functions, for direct calls:
