@@ -24,21 +24,20 @@
 #include <scoop/Object.h>
 #include <string.h>
 
-/* all pure virtuals are set to this */
 static void pure_virtual(void)
 {
 	sco_fatal("Error: pure virtual SCOOP method called!");
 }
 
-/* used to initialize all meta types */
-static void sco_Object_Meta_init(scoObject_Meta *o)
+/* recursively fills in blank parts of meta type instance chain */
+static void init_meta(scoObject_Meta *o)
 {
 	void (**virt)() = (void (**)()) &o->virt,
 			 (**super_virtab)() = 0;
 	unsigned int i = 0, max;
 	if (o->super) {
 		if (!o->super->done)
-			sco_Object_Meta_init((scoObject_Meta*)o->super);
+			init_meta((scoObject_Meta*)o->super);
 		super_virtab = (void (**)()) &o->super->virt;
 		for (max = o->super->vnum; i < max; ++i)
 			if (!virt[i]) virt[i] = super_virtab[i];
@@ -50,7 +49,7 @@ static void sco_Object_Meta_init(scoObject_Meta *o)
 	o->done = 1;
 }
 
-void* _sco_new(void *mem, void *_meta)
+void* sco_raw_new(void *mem, void *_meta)
 {
 	scoObject_Meta *meta = _meta;
 	if (!mem) {
@@ -59,7 +58,7 @@ void* _sco_new(void *mem, void *_meta)
 	} else {
 		memset(mem, 0, meta->size);
 	}
-	if (!meta->done) sco_Object_Meta_init(meta);
+	if (!meta->done) init_meta(meta);
 	sco_set_meta(mem, meta);
 	return mem;
 }
@@ -84,13 +83,15 @@ void sco_finalize(void *o)
 	sco_set_metaof(o, scoNull);
 }
 
-int _sco_rtticheck(const void *sub_meta, const void *meta)
+int sco_rtticheck(const void *submeta, const void *meta)
 {
-	const scoObject_Meta *subclass = sub_meta, *class = meta;
-	if (subclass == class) return 0;
+	const scoObject_Meta *subclass = submeta, *class = meta;
+	if (subclass == class)
+		return 0;
 	do {
 		subclass = subclass->super;
-		if (subclass == class) return 1;
+		if (subclass == class)
+			return 1;
 	} while (subclass);
 	return -1;
 }

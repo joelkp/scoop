@@ -116,7 +116,7 @@ typedef struct Name { Name##_ } Name
  * type's member list macro at the beginning, giving rise to single
  * inheritance and allowing type-cast compatibility.
  *
- * \ref SCOclass() combines this and \ref SCOmeta() into a single
+ * \ref SCOclass() combines this and \ref SCOmetatype() into a single
  * keyword-like macro.
  */
 #define SCOclasstype(Name) \
@@ -149,7 +149,7 @@ typedef void (*scoDtor)(void *o);
  * _SCOclass() combines this and SCOclasstype() into a single
  * "keyword".
  */
-#define _SCOmeta(Class) \
+#define _SCOmetatype(Class) \
 typedef struct Class##_Virt { Class##__ } Class##_Virt; \
 typedef struct Class##_Meta { \
 	const struct scoObject_Meta *super; \
@@ -183,14 +183,14 @@ typedef struct Class##_Meta { \
   *
   * SCOclass() combines this and SCOclasstype() into a single "keyword".
   */
-#define SCOmeta(Class) \
-_SCOmeta(Class); \
+#define SCOmetatype(Class) \
+_SCOmetatype(Class); \
 SCO_USERAPI extern Class##_Meta _##Class##_meta
 
 /** Get the global meta type instance of the \p Class named.
   *
   * This requires it to have been either forward-declared with
-  * SCOmeta() (as is done for public APIs) when the class was
+  * SCOmetatype() (as is done for public APIs) when the class was
   * defined - or to have been otherwise defined earlier in the same
   * module if part of a non-public API.
   *
@@ -199,25 +199,25 @@ SCO_USERAPI extern Class##_Meta _##Class##_meta
   */
 #define sco_metaof(Class) (&(_##Class##_meta))
 
-/** This combines SCOclasstype() and _SCOmeta() to declare a class
+/** This combines SCOclasstype() and _SCOmetatype() to declare a class
   * and its meta type at once.
   * \see SCOclasstype()
-  * \see _SCOmeta()
+  * \see _SCOmetatype()
   */
 #define _SCOclass(Class) \
 SCOclasstype(Class); \
-_SCOmeta(Class)
+_SCOmetatype(Class)
 
-/** This combines SCOclasstype() and SCOmeta() to declare a class
+/** This combines SCOclasstype() and SCOmetatype() to declare a class
   * and its meta type at once - and forward-declare the symbol of
   * the SCO_CLASSDEF() definition of the global meta type for
   * export, as is done for public APIs.
   * \see SCOclasstype()
-  * \see SCOmeta()
+  * \see SCOmetatype()
   */
 #define SCOclass(Class) \
 SCOclasstype(Class); \
-SCOmeta(Class)
+SCOmetatype(Class)
 
 /** Use to declare a pair of allocation and constructor functions for a
   * class if they do not take variable arguments. They will be named
@@ -274,7 +274,7 @@ unsigned char FunctionName##_ctor Parlist; \
 Class* FunctionName##_new Parlist \
 { \
 	void *SCO_CLASSCTOR__mem = (o); \
-	(o) = _sco_new(SCO_CLASSCTOR__mem, sco_metaof(Class)); \
+	(o) = sco_raw_new(SCO_CLASSCTOR__mem, sco_metaof(Class)); \
 	if ((o) && !FunctionName##_ctor Arglist) { \
 		sco_set_metaof((o), scoNull); \
 		if (!SCO_CLASSCTOR__mem) free(o); \
@@ -344,7 +344,7 @@ SCOclasstype(scoObject);
   *
   * scoObject is just a dummy definition - not a valid class name!
   */
-_SCOmeta(scoObject);
+_SCOmetatype(scoObject);
 
 #ifndef SCO_DOXYGEN
 /* This is a dummy meta type allowing the keyword \a scoNull
@@ -397,7 +397,7 @@ _SCOmeta(scoObject);
   * The \a meta pointer of the new object is set to \p
   * meta.
   */
-SCO_API void* _sco_new(void *mem, void *meta);
+SCO_API void* sco_raw_new(void *mem, void *meta);
 
 /** Destroys object and frees memory, first calling every destructor in
   * the class hierarchy from present type to base type.
@@ -423,28 +423,28 @@ SCO_API void sco_finalize(void *o);
   * It checks if \p submeta is a subclass of \p meta.
   * Returns 1 if subclass, 0 if same class, -1 if neither.
   */
-SCO_API int _sco_rtticheck(const void *submeta, const void *meta);
+SCO_API int sco_rtticheck(const void *submeta, const void *meta);
 
 /** Checks if the named \p Subclass is a subclass of the named \p Class.
   * Returns 1 if subclass, 0 if same class, -1 if neither.
   */
 #define sco_subclass(Subclass, Class) \
-	_sco_rtticheck(sco_metaof(Subclass), sco_metaof(Class))
+	sco_rtticheck(sco_metaof(Subclass), sco_metaof(Class))
 
 /** Checks if the named \p Superclass is a superclass of the named \p Class.
   * Returns 1 if superclass, 0 if same class, -1 if neither.
   */
 #define sco_superclass(Superclass, Class) \
-	_sco_rtticheck(sco_metaof(Class), sco_metaof(Superclass))
+	sco_rtticheck(sco_metaof(Class), sco_metaof(Superclass))
 
 /** Checks if \p o is an instance of \p Class or of a class derived
     from it. */
 #define sco_of_class(o, Class) \
-	(_sco_rtticheck((o)->meta, sco_metaof(Class)) >= 0)
+	(sco_rtticheck((o)->meta, sco_metaof(Class)) >= 0)
 
 /** Checks if \p o is of a type derived from \p Class. */
 #define sco_of_subclass(o, Class) \
-	(_sco_rtticheck((o)->meta, sco_metaof(Class)) > 0)
+	(sco_rtticheck((o)->meta, sco_metaof(Class)) > 0)
 
 #ifdef __cplusplus
 }
