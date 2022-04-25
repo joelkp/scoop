@@ -44,7 +44,7 @@ SCO_META(scoExtendedThing, scoThing, 0, scoExtendedThing_virtinit);
 
 SCO_CTOR(scoExtendedThing, sco_ExtendedThing, (scoExtendedThing *o), (o), o)
 {
-	sco_Thing_ctor((scoThing*)o);
+	sco_Thing_ctor(o);
 	o->y = 42.f;
 	return 1;
 }
