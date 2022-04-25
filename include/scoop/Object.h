@@ -128,6 +128,12 @@ typedef struct Name { const struct Name##_Meta *meta; Name##_ } Name
 typedef void (*scoDtor)(void *o);
 
 /**
+ * Meta type vtable initializer function pointer type.
+ * The meta type instance is expected as the \p o argument.
+ */
+typedef void (*scoVtinit)(void *o);
+
+/**
  * Declare a meta type for a type declared with SCOclass();
  * the name of this type seldom needs to be explicitly referenced,
  * but is the same as that of the class with _Meta appended.
@@ -157,8 +163,8 @@ typedef struct Class##_Meta { \
 	unsigned short vnum; \
 	unsigned char done; \
 	const char *name; \
-	scoDtor vtinit; /* virtual table init function; passed meta */ \
-	scoDtor dtor; /* not counted in vnum (is not part of virt) */ \
+	scoVtinit vtinit; /* virtual table init function, passed meta */ \
+	scoDtor dtor; /* outside virt and not counted in vnum */ \
 	Class##_Virt virt; \
 } Class##_Meta
 
@@ -313,7 +319,7 @@ struct Class##_Meta _##Class##_meta = { \
 	(sizeof(Class##_Virt) / sizeof(void (*)())), \
 	0, \
 	#Class, \
-	(scoDtor)vtinit, \
+	(scoVtinit)vtinit, \
 	(scoDtor)dtor, \
 	{} \
 }
