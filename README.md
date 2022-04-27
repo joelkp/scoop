@@ -1,17 +1,24 @@
 SCOOP: Simple C library for Object-Oriented Programming
 -------------------------------------------------------
 
-SCOOP is a Simple C library for Object-Oriented Programming. The aim is for
-it to provide lightweight support for object-oriented APIs structured
-similarly to those that can be made using C++, without any undue verbosity
-and without any needless computational overhead.
+SCOOP is a Simple C library for Object-Oriented Programming.
+The aim was for it to provide lightweight support for object-oriented APIs
+that are structured similarly some older single inheritance C++ codebases,
+but in plain C, with minimal verbosity.
+
+This library was made in 2013, as a clean repackaging of experimenting in
+2010-2011. A 2022 [article on such object-oriented C](https://joelkp.frama.io/blog/c-struct-inherit.html)
+describes the ideas and some basic gotchas to keep in mind about the approach.
+Currently, this proof-of-concept library is not actively developed further,
+but if of interest further work could go into it. It would probably be more
+useful to take a look at the ideas it contains and, given the small size of
+it all, to cook up something adapted for your particular project, which may
+make use of some elements of SCOOP's approach.
 
 The approach is one of providing some simple routines, along with using the
-C preprocessor to implement some features and increase the brevity of code
-using this library.
-
-Features that are too computationally expensive and/or which increase the
-need for verbosity - like multiple inheritance - are purposefully left out.
+C preprocessor. Anything that can't be implemented so as to be usable with
+great brevity and small overhead is purposefully left out,
+including multiple inheritance.
 
 The core of the library is the Object module, which provides support for:
 - Class declaration and definition
@@ -22,22 +29,13 @@ The core of the library is the Object module, which provides support for:
 
 See the header files for the library for further details. The library can be built with `make` on many GNU/Linux systems, and with `gmake` on BSDs.
 
-This library was made in 2013, as a clean repackaging of something I'd experimented with 2010-2011. In-between, in 2012 I wrote [an article on object-oriented C, later reworked and expanded](https://joelkp.frama.io/blog/c-struct-inherit.html). Currently, this proof-of-concept library is not actively developed further, but if of interest further work could go into it. It's so small and simple that modified copies of the code are more likely to end up in future software of mine with different naming.
-
 Licensing
 ---------
 
-SCOOP is distributed under the MIT (specifically Expat) license. Informally,
-the MIT (Expat) license basically means that you can do anything you want
-with the software so long as you preserve the copyright and license notices
-in the files that have them. Also, the use of the software is solely at your
-own risk - no warranty is provided and no liabilities accepted.
+SCOOP is distributed under the MIT license below.
+The following copyright notice applies to SCOOP as a whole.
 
-The following copyright notice applies to SCOOP as a whole:
-Copyright (c) 2010, 2011, 2013 Joel K. Pettersson.
-
-Here is a copy of the MIT (Expat) license, as also found in all the source
-files part of SCOOP:
+Copyright (c) 2010, 2011, 2013, 2022 Joel K. Pettersson.
 
 "Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
