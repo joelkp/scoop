@@ -61,7 +61,7 @@ extern "C" {
    A note on the SCOOP API naming convention:
    - Declarations and definitions meant to mimic new keywords are named
      with an "SCO"-prefix (no underscore follows), the rest of the name
-     then in lowercase. E.g., SCOclass.
+     then in lowercase. E.g., SCOclassdef.
    - Functions and macros that behave like functions are named with an
      "sco_"-prefix and the rest of the name in lowercase, unless methods
      of a class.
@@ -89,11 +89,11 @@ extern "C" {
  * way they are listed within a struct declaration; it will be
  * referenced as a means of declaring the type.
  *
- * A member list macro can reference one other SCOstruct()
+ * A member list macro can reference one other SCOstructdef()
  * type's member list macro at the beginning, giving rise to single
  * inheritance and allowing type-cast compatibility.
  */
-#define SCOstruct(Name) \
+#define SCOstructdef(Name) \
 typedef struct Name { Name##_ } Name
 
 /*
@@ -112,11 +112,11 @@ typedef struct Name { Name##_ } Name
  * way they are listed within a struct declaration; it will be
  * referenced as a means of declaring the type.
  *
- * A member list macro can reference one other SCOclass()/SCOclasstype()
+ * A member list macro can reference one other SCOclassdef()/SCOclasstype()
  * type's member list macro at the beginning, giving rise to single
  * inheritance and allowing type-cast compatibility.
  *
- * \ref SCOclass() combines this and \ref SCOmetatype() into a single
+ * \ref SCOclassdef() combines this and \ref SCOmetatype() into a single
  * keyword-like macro.
  */
 #define SCOclasstype(Name) \
@@ -134,12 +134,12 @@ typedef void (*scoDtor)(void *o);
 typedef void (*scoVtinit)(void *o);
 
 /**
- * Declare a meta type for a type declared with SCOclass();
+ * Declare a meta type for a type declared with SCOclassdef();
  * the name of this type seldom needs to be explicitly referenced,
  * but is the same as that of the class with _Meta appended.
  *
  * This version \a does \a not forward-declare the corresponding global
- * instance made by SCO_META() for symbol export.
+ * instance made by SCOmetainst() for symbol export.
  *
  * The declaration uses the corresponding macro listing virtual
  * methods - named the same as the class except for having \a two
@@ -152,7 +152,7 @@ typedef void (*scoVtinit)(void *o);
  * pointers form the contents of the virtual table data structure for the
  * class, named the same as the class except with _Virt appended.
  *
- * _SCOclass() combines this and SCOclasstype() into a single
+ * _SCOclassdef() combines this and SCOclasstype() into a single
  * "keyword".
  */
 #define _SCOmetatype(Class) \
@@ -168,12 +168,12 @@ typedef struct Class##_Meta { \
 	Class##_Virt virt; \
 } Class##_Meta
 
-/** Declare a meta type for a type declared with SCOclass().
+/** Declare a meta type for a type declared with SCOclassdef().
   * the name of this type seldom needs to be explicitly referenced,
   * but is the same as that of the class with _Meta appended.
   *
   * This version \a will \a also forward-declare the corresponding global
-  * instance made by SCO_META() for symbol export, as is done for
+  * instance made by SCOmetainst() for symbol export, as is done for
   * public APIs.
   *
   * The declaration uses the corresponding macro listing virtual
@@ -187,7 +187,7 @@ typedef struct Class##_Meta { \
   * pointers form the contents of the virtual table data structure for the
   * class, named the same as the class except with _Virt appended.
   *
-  * SCOclass() combines this and SCOclasstype() into a single "keyword".
+  * SCOclassdef() combines this and SCOclasstype() into a single "keyword".
   */
 #define SCOmetatype(Class) \
 _SCOmetatype(Class); \
@@ -210,18 +210,18 @@ SCO_USERAPI extern Class##_Meta _##Class##_meta
   * \see SCOclasstype()
   * \see _SCOmetatype()
   */
-#define _SCOclass(Class) \
+#define _SCOclassdef(Class) \
 SCOclasstype(Class); \
 _SCOmetatype(Class)
 
 /** This combines SCOclasstype() and SCOmetatype() to declare a class
   * and its meta type at once - and forward-declare the symbol of
-  * the SCO_META() definition of the global meta type for
+  * the SCOmetainst() definition of the global meta type for
   * export, as is done for public APIs.
   * \see SCOclasstype()
   * \see SCOmetatype()
   */
-#define SCOclass(Class) \
+#define SCOclassdef(Class) \
 SCOclasstype(Class); \
 SCOmetatype(Class)
 
@@ -231,12 +231,12 @@ SCOmetatype(Class)
   * the exact same arguments, the parameters given by \p Parlist.
   * Any number of these function pairs may be declared and defined.
   *
-  * \ref SCO_CTOR() is used to define an allocation/construction
-  * function pair declared with SCOctor().
+  * \ref SCOctordef() is used to define an allocation/construction
+  * function pair declared with SCOctordec().
   *
-  * \see SCO_CTOR() for further details.
+  * \see SCOctordef() for further details.
   */
-#define SCOctor(Class, FunctionName, Parlist) \
+#define SCOctordec(Class, FunctionName, Parlist) \
 SCO_USERAPI Class* FunctionName##_new Parlist; \
 SCO_USERAPI unsigned char FunctionName##_ctor Parlist
 
@@ -273,17 +273,17 @@ SCO_USERAPI unsigned char FunctionName##_ctor Parlist
   *
   * Any number of these function pairs may be declared and defined.
   *
-  * \see SCOctor() for declaring them.
+  * \see SCOctordec() for declaring them.
   */
-#define SCO_CTOR(Class, FunctionName, Parlist, Arglist, o) \
+#define SCOctordef(Class, FunctionName, Parlist, Arglist, o) \
 unsigned char FunctionName##_ctor Parlist; \
 Class* FunctionName##_new Parlist \
 { \
-	void *SCO_CTOR__mem = (o); \
-	(o) = sco_raw_new(SCO_CTOR__mem, sco_metaof(Class)); \
+	void *SCOctordef__mem = (o); \
+	(o) = sco_raw_new(SCOctordef__mem, sco_metaof(Class)); \
 	if ((o) && !FunctionName##_ctor Arglist) { \
 		sco_set_metaof((o), scoNone); \
-		if (!SCO_CTOR__mem) free(o); \
+		if (!SCOctordef__mem) free(o); \
 		return 0; \
 	} \
 	return (o); \
@@ -312,7 +312,7 @@ unsigned char FunctionName##_ctor Parlist
   * undefined) functions are automatically defined to prompt a fatal error
   * (using \ref sco_fatal()) if called.
   */
-#define SCO_META(Class, Superclass, dtor, vtinit) \
+#define SCOmetainst(Class, Superclass, dtor, vtinit) \
 struct Class##_Meta _##Class##_meta = { \
 	(scoObject_Meta*)sco_metaof(Superclass), \
 	sizeof(Class), \
@@ -337,7 +337,7 @@ struct Class##_Meta _##Class##_meta = { \
 /** Dummy class containing only the meta type pointer; a
   * scoObject pointer and/or cast may be used to access the basic
   * (common) type information of any object of a class declared with
-  * SCOclass().
+  * SCOclassdef().
   *
   * scoObject is just a dummy definition - not a valid class name!
   */
@@ -354,7 +354,7 @@ _SCOmetatype(scoObject);
 
 #ifndef SCO_DOXYGEN
 /* This is a dummy meta type allowing the keyword \a scoNone
- * to be specified as the supertype for base classes in SCO_META().
+ * to be specified as the supertype for base classes in SCOmetainst().
  */
 # define _scoNone_meta (*(scoObject_Meta*)(0))
 #endif
@@ -382,14 +382,9 @@ _SCOmetatype(scoObject);
 #define sco_set_metaof(mem, Class) \
 	((void)(((scoObject*)mem)->meta = (scoObject_Meta*)sco_metaof(Class)))
 
-/** Get the virtual table (class-specific) of an object.
-  */
-#define sco_virtab(o) \
-	(&(o)->meta->virt)
-
 /** Allocation method used in instance construction functions,
   * typically in the wrapper around the initialization
-  * function generated by SCO_CTOR(). (a *_new() function for a
+  * function generated by SCOctordef(). (a *_new() function for a
   * type with an empty constructor can be defined as a wrapper
   * macro around this)
   *

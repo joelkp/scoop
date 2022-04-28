@@ -45,9 +45,9 @@ static void scoThing_virtinit(scoThing_Meta *o)
 	vt->do_foo = sco_Thing_do_foo_;
 	vt->do_bar = sco_Thing_do_bar_;
 }
-SCO_META(scoThing, scoNone, 0, scoThing_virtinit);
+SCOmetainst(scoThing, scoNone, 0, scoThing_virtinit);
 
-SCO_CTOR(scoThing, sco_Thing, (scoThing *o), (o), o)
+SCOctordef(scoThing, sco_Thing, (scoThing *o), (o), o)
 {
 	o->x = 10;
 	return 1;

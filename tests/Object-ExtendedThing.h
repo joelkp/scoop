@@ -38,9 +38,9 @@
 
 #define scoExtendedThing__ scoThing__
 
-SCOclass(scoExtendedThing);
+SCOclassdef(scoExtendedThing);
 
-SCOctor(scoExtendedThing, sco_ExtendedThing, (SCO_TYPE *o));
+SCOctordec(scoExtendedThing, sco_ExtendedThing, (SCO_TYPE *o));
 
 /*
  * The scoExtendedThing versions of virtual functions, for direct calls:

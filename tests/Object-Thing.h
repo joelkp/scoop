@@ -40,9 +40,9 @@
   void (*do_foo)(SCO_TYPE *o); \
   void (*do_bar)(SCO_TYPE *o);
 
-SCOclass(scoThing);
+SCOclassdef(scoThing);
 
-SCOctor(scoThing, sco_Thing, (SCO_TYPE *o));
+SCOctordec(scoThing, sco_Thing, (SCO_TYPE *o));
 
 /*
  * Macros to make virtual functions look like plain functions.
