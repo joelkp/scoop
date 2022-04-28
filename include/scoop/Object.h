@@ -156,7 +156,7 @@ typedef void (*scoVtinit)(void *o);
  * "keyword".
  */
 #define _SCOmetatype(Class) \
-typedef struct Class##_Virt { Class##__ } Class##_Virt; \
+typedef struct Class##_Virt { scoDtor dtor; Class##__ } Class##_Virt; \
 typedef struct Class##_Meta { \
 	const struct scoObject_Meta *super; \
 	size_t size; \
@@ -164,7 +164,6 @@ typedef struct Class##_Meta { \
 	unsigned char done; \
 	const char *name; \
 	scoVtinit vtinit; /* virtual table init function, passed meta */ \
-	scoDtor dtor; /* outside virt and not counted in vnum */ \
 	Class##_Virt virt; \
 } Class##_Meta
 
@@ -320,8 +319,7 @@ struct Class##_Meta _##Class##_meta = { \
 	0, \
 	#Class, \
 	(scoVtinit)vtinit, \
-	(scoDtor)dtor, \
-	{} \
+	{(scoDtor)dtor}, \
 }
 
 /** The member content list for the dummy type scoObject - it is empty,

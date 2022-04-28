@@ -34,7 +34,7 @@ static void init_meta(scoObject_Meta *o)
 {
 	void (**virt)() = (void (**)()) &o->virt,
 			 (**super_virtab)() = 0;
-	unsigned int i = 0, max;
+	unsigned int i = 1, max; /* skip dtor */
 	if (o->super) {
 		if (!o->super->done)
 			init_meta((scoObject_Meta*)o->super);
@@ -67,7 +67,7 @@ void sco_delete(void *o)
 {
 	const scoObject_Meta *meta = sco_meta(o);
 	do {
-		if (meta->dtor) meta->dtor(o);
+		if (meta->virt.dtor) meta->virt.dtor(o);
 		meta = meta->super;
 	} while (meta);
 	free(o);
@@ -77,12 +77,13 @@ void sco_finalize(void *o)
 {
 	const scoObject_Meta *meta = sco_meta(o);
 	do {
-		if (meta->dtor) meta->dtor(o);
+		if (meta->virt.dtor) meta->virt.dtor(o);
 		meta = meta->super;
 	} while (meta);
 	sco_set_metaof(o, scoNone);
 }
 
+/* core of type comparison */
 int sco_rtticheck(const void *submeta, const void *meta)
 {
 	const scoObject_Meta *subclass = submeta, *class = meta;
