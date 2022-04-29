@@ -48,7 +48,7 @@ SCOctordec(scoExtendedThing, sco_ExtendedThing, (SCO_TYPE *o));
  */
 
 void sco_ExtendedThing_do_foo_(SCO_TYPE *o);
-void sco_ExtendedThing_do_baz_(SCO_TYPE *o, int value, ...);
+void sco_ExtendedThing_do_baz_(SCO_TYPE *o, int string_count, ...);
 
 #include <scoop/END.h>
 

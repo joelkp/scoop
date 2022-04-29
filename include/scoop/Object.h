@@ -91,7 +91,10 @@ extern "C" {
  *
  * A member list macro can reference one other SCOstructdef()
  * type's member list macro at the beginning, giving rise to single
- * inheritance and allowing type-cast compatibility.
+ * inheritance and allowing type-cast pseudo-compatibility. (Padding
+ * at the end of a base type struct may overlap with members added
+ * in a derived type struct. To avoid this, inherited members can be
+ * wrapped in an anonymous struct. This works for non-class types.)
  */
 #define SCOstructdef(Name) \
 typedef struct Name { Name##_ } Name
@@ -114,7 +117,7 @@ typedef struct Name { Name##_ } Name
  *
  * A member list macro can reference one other SCOclassdef()/SCOclasstype()
  * type's member list macro at the beginning, giving rise to single
- * inheritance and allowing type-cast compatibility.
+ * inheritance and allowing type-cast pseudo-compatibility.
  *
  * \ref SCOclassdef() combines this and \ref SCOmetatype() into a single
  * keyword-like macro.
@@ -139,21 +142,11 @@ typedef void (*scoVtinit)(void *o);
  * but is the same as that of the class with _Meta appended.
  *
  * This version \a does \a not forward-declare the corresponding global
- * instance made by SCOmetainst() for symbol export.
+ * instance made by \ref SCOmetainst() for symbol export.
  *
- * The declaration uses the corresponding macro listing virtual
- * methods - named the same as the class except for having \a two
- * appended underscores - which should contain a sequence of
- * function pointer declarations.
+ * \see SCOmetatype()
  *
- * That macro can reference one other such macro at the beginning of
- * its contents for (single) inheritance - and this must be done when
- * inheriting from another class. The resulting list of function
- * pointers form the contents of the virtual table data structure for the
- * class, named the same as the class except with _Virt appended.
- *
- * _SCOclassdef() combines this and SCOclasstype() into a single
- * "keyword".
+ * _SCOclassdef() combines this and SCOclasstype() into a single step.
  */
 #define _SCOmetatype(Class) \
 typedef struct Class##_Virt { scoDtor dtor; Class##__ } Class##_Virt; \
@@ -173,7 +166,7 @@ typedef struct Class##_Meta { \
   *
   * This version \a will \a also forward-declare the corresponding global
   * instance made by SCOmetainst() for symbol export, as is done for
-  * public APIs.
+  * public APIs. To avoid that, use \ref _SCOmetatype() instead.
   *
   * The declaration uses the corresponding macro listing virtual
   * methods - named the same as the class except for having \a two
@@ -186,7 +179,7 @@ typedef struct Class##_Meta { \
   * pointers form the contents of the virtual table data structure for the
   * class, named the same as the class except with _Virt appended.
   *
-  * SCOclassdef() combines this and SCOclasstype() into a single "keyword".
+  * SCOclassdef() combines this and SCOclasstype() into a single step.
   */
 #define SCOmetatype(Class) \
 _SCOmetatype(Class); \
@@ -231,7 +224,7 @@ SCOmetatype(Class)
   * Any number of these function pairs may be declared and defined.
   *
   * \ref SCOctordef() is used to define an allocation/construction
-  * function pair declared with SCOctordec().
+  * function pair, whether or not it was forward-declared using this.
   *
   * \see SCOctordef() for further details.
   */
@@ -272,7 +265,7 @@ SCO_USERAPI unsigned char FunctionName##_ctor Parlist
   *
   * Any number of these function pairs may be declared and defined.
   *
-  * \see SCOctordec() for declaring them.
+  * \see SCOctordec() for simply declaring them as in a header.
   */
 #define SCOctordef(Class, FunctionName, Parlist, Arglist, o) \
 unsigned char FunctionName##_ctor Parlist; \
@@ -389,6 +382,8 @@ _SCOmetatype(scoObject);
  * versions of virtual functions, but is not needed to make such
  * calls. It can only be used for functions which have this form
  * and include the object pointer as the first parameter.
+ *
+ * This macro is limited to functions with at most 16 arguments.
  */
 #define sco_virt(func, o, ...) \
 	((o)->meta->virt.func((o) SCO_COMMA_ON_ARGS(__VA_ARGS__) __VA_ARGS__))

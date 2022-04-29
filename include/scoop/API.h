@@ -172,7 +172,7 @@ SCO_API extern void (*sco_fatal)(const char *msg, ...);
 /**
  * C99-compatible macro returning a comma if the argument list is not empty.
  * Derived from Jens Gustedt's empty macro arguments detection. This version
- * support a maximum of 16 arguments.
+ * only works with fewer than 16 arguments.
  */
 #define SCO_COMMA_ON_ARGS(...) \
 SCO__COMMA_ON_ARGS( \
