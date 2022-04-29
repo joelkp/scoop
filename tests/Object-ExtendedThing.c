@@ -1,6 +1,6 @@
 /* Simple test program for the SCOOP Object module - ExtendedThing module
  *
- * Copyright (c) 2010, 2011, 2013 Joel K. Pettersson
+ * Copyright (c) 2010, 2011, 2013, 2022 Joel K. Pettersson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -35,10 +35,28 @@ void sco_ExtendedThing_do_foo_(scoExtendedThing *o)
 	printf("do_foo (scoExtendedThing version): %d, %f\n", o->x, o->y);
 }
 
+/* prints the passed string_count number of strings */
+void sco_ExtendedThing_do_baz_(scoExtendedThing *o, int string_count, ...) {
+	va_list ap;
+	va_start(ap, string_count);
+	printf("do_baz() called with strings:\n\t");
+	if (string_count > 0) {
+		printf("%s", va_arg(ap, const char*));
+	}
+	for (int i = 1; i < string_count; ++i) {
+		printf(", %s", va_arg(ap, const char*));
+	}
+	if (string_count > 0) {
+		putchar('\n');
+	}
+	va_end(ap);
+}
+
 static void scoExtendedThing_virtinit(scoExtendedThing_Meta *o)
 {
 	scoExtendedThing_Virt *vt = &o->virt;
-	vt->do_foo = sco_ExtendedThing_do_foo_;
+	vt->do_foo = sco_ExtendedThing_do_foo_; /* overridden */
+	vt->do_baz = sco_ExtendedThing_do_baz_;
 }
 SCOmetainst(scoExtendedThing, scoThing, 0, scoExtendedThing_virtinit);
 

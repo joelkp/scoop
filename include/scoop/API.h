@@ -3,7 +3,7 @@
  * through an inclusion of BEGIN.h in a header. (See \ref SCO_TYPE below
  * for more info on BEGIN.h and END.h.)
  *
- * Copyright (c) 2010, 2011, 2013 Joel K. Pettersson
+ * Copyright (c) 2010, 2011, 2013, 2022 Joel K. Pettersson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -168,6 +168,35 @@ SCO_API extern void (*sco_fatal)(const char *msg, ...);
 # undef SCO_MODULE
 # define SCO_MODULE void
 #endif
+
+/**
+ * C99-compatible macro returning a comma if the argument list is not empty.
+ * Derived from Jens Gustedt's empty macro arguments detection. This version
+ * support a maximum of 16 arguments.
+ */
+#define SCO_COMMA_ON_ARGS(...) \
+SCO__COMMA_ON_ARGS( \
+	/* exclude if there's just one argument, empty or not */        \
+	SCO_HAS_COMMA(__VA_ARGS__),                                     \
+	/* exclude if _TRIGGER_PARENTHESIS_ and argument adds a comma */\
+	SCO_HAS_COMMA(SCO__TRIGGER_PARENTHESIS_ __VA_ARGS__),           \
+	/* exclude if the argument and a parenthesis adds a comma */    \
+	SCO_HAS_COMMA(__VA_ARGS__ (/*empty*/)),                         \
+	/* if placed between _TRIGGER_PARENTHESIS_ and parentheses? */  \
+	SCO_HAS_COMMA(SCO__TRIGGER_PARENTHESIS_ __VA_ARGS__ (/*empty*/))\
+)
+#define SCO__ARG3(_0, _1, _2, ...) _2
+#define SCO__ARG16(_0, _1, _2, _3, _4, _5, _6, _7, \
+		_8, _9, _10, _11, _12, _13, _14, _15, ...) _15
+#define SCO__IS_EMPTY_CASE_0001 ,
+#define SCO_HAS_COMMA(...) SCO__ARG16(__VA_ARGS__, \
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+#define SCO_CONCAT5(_0, _1, _2, _3, _4) _0 ## _1 ## _2 ## _3 ## _4
+#define SCO__COMMA ,
+#define SCO__INVERT_COMMA(...) SCO__ARG3(__VA_ARGS__, , SCO__COMMA )
+#define SCO__COMMA_ON_ARGS(_0, _1, _2, _3) \
+	SCO__INVERT_COMMA(SCO_CONCAT5(SCO__IS_EMPTY_CASE_, _0, _1, _2, _3))
+#define SCO__TRIGGER_PARENTHESIS_(...) ,
 
 #ifdef __cplusplus
 }

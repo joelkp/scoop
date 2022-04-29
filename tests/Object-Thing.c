@@ -1,6 +1,6 @@
 /* Simple test program for the SCOOP Object module - Thing module
  *
- * Copyright (c) 2010, 2011, 2013 Joel K. Pettersson
+ * Copyright (c) 2010, 2011, 2013, 2022 Joel K. Pettersson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),

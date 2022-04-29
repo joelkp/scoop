@@ -1,6 +1,6 @@
 /* Simple test program for the SCOOP Object module - ExtendedThing module
  *
- * Copyright (c) 2010, 2011, 2013 Joel K. Pettersson
+ * Copyright (c) 2010, 2011, 2013, 2022 Joel K. Pettersson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,20 +34,21 @@
  */
 
 #define scoExtendedThing_ scoThing_ \
-  float y;
+	float y;
 
-#define scoExtendedThing__ scoThing__
+#define scoExtendedThing__ scoThing__ \
+	void (*do_baz)(SCO_TYPE *o, int value, ...); \
 
 SCOclassdef(scoExtendedThing);
 
 SCOctordec(scoExtendedThing, sco_ExtendedThing, (SCO_TYPE *o));
 
 /*
- * The scoExtendedThing versions of virtual functions, for direct calls:
+ * The scoExtendedThing versions of virtual functions, for direct calls.
  */
 
 void sco_ExtendedThing_do_foo_(SCO_TYPE *o);
-
+void sco_ExtendedThing_do_baz_(SCO_TYPE *o, int value, ...);
 
 #include <scoop/END.h>
 

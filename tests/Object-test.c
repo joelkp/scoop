@@ -1,6 +1,6 @@
 /* Simple test program for the SCOOP Object module - main module
  *
- * Copyright (c) 2010, 2011, 2013 Joel K. Pettersson
+ * Copyright (c) 2010, 2011, 2013, 2022 Joel K. Pettersson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,15 +33,16 @@ int main()
 	 */
 	if (sco_of_class(thing, scoThing))
 		puts("'thing' is a scoThing");
-	sco_Thing_do_foo(thing);
-	sco_Thing_do_bar(thing);
+	sco_virt(do_foo, thing);
+	sco_virt(do_bar, thing);
 
 	if (sco_of_class(ething, scoExtendedThing))
 		puts("'ething' is a scoExtendedThing");
 	if (sco_of_subclass(ething, scoThing))
 		puts("'ething' inherits scoThing");
-	sco_Thing_do_foo(ething);
-	sco_Thing_do_bar(ething);
+	sco_virt(do_foo, ething);
+	sco_virt(do_bar, ething);
+	sco_virt(do_baz, ething, 2, "aaa", "bbb");
 
 	/* Recreate fresh scoThing instance reusing the same memory
 	 * allocation.
