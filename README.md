@@ -1,5 +1,5 @@
 SCOOP: Simple C library for Object-Oriented Programming
--------------------------------------------------------
+=======================================================
 
 SCOOP is a Simple C library for Object-Oriented Programming.
 The aim was for it to provide lightweight support for object-oriented APIs
@@ -28,6 +28,15 @@ The core of the library is the Object module, which provides support for:
 - Explicit RTTI checks
 
 See the header files for the library for further details. The library can be built with `make` on many GNU/Linux systems, and with `gmake` on BSDs.
+
+Branches and C and C++ compatibility
+------------------------------------
+
+Originally, the library was designed to be able to coexist with C++ code easily. Thus, it mainly uses ANSI C (C89) features, and some C99 features that don't conflict with C++. (It also relies on some undefined behavior generally working just fine.)
+
+A subset of the library which compiles fine with `-std=c89 -pedantic` options can be found in the git `c89` branch. This subset has exactly the features of the 2013 version.
+
+Compared to the `c89` version, the main version is changed to use mainly C99 macro features for somewhat greater ease of use.
 
 Licensing
 ---------
