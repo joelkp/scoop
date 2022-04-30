@@ -37,13 +37,14 @@ void sco_ExtendedThing_do_foo_(scoExtendedThing *o)
 
 /* prints the passed string_count number of strings */
 void sco_ExtendedThing_do_baz_(scoExtendedThing *o, int string_count, ...) {
+	int i;
 	va_list ap;
 	va_start(ap, string_count);
 	printf("do_baz() called with strings:\n\t");
 	if (string_count > 0) {
 		printf("%s", va_arg(ap, const char*));
 	}
-	for (int i = 1; i < string_count; ++i) {
+	for (i = 1; i < string_count; ++i) {
 		printf(", %s", va_arg(ap, const char*));
 	}
 	if (string_count > 0) {

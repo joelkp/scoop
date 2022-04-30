@@ -33,16 +33,16 @@ int main()
 	 */
 	if (sco_of_class(thing, scoThing))
 		puts("'thing' is a scoThing");
-	sco_virt(do_foo, thing);
-	sco_virt(do_bar, thing);
+	thing->meta->virt.do_foo(thing);
+	thing->meta->virt.do_bar(thing);
 
 	if (sco_of_class(ething, scoExtendedThing))
 		puts("'ething' is a scoExtendedThing");
 	if (sco_of_subclass(ething, scoThing))
 		puts("'ething' inherits scoThing");
-	sco_virt(do_foo, ething);
-	sco_virt(do_bar, ething);
-	sco_virt(do_baz, ething, 2, "aaa", "bbb");
+	ething->meta->virt.do_foo(ething);
+	ething->meta->virt.do_bar(ething);
+	ething->meta->virt.do_baz(ething, 2, "aaa", "bbb");
 
 	/* Recreate fresh scoThing instance reusing the same memory
 	 * allocation.

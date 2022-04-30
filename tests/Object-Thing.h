@@ -47,12 +47,7 @@ SCOctordec(scoThing, sco_Thing, (SCO_TYPE *o));
 /*
  * The scoThing versions of virtual functions, for direct calls.
  *
- * To call a dynamically selected version instead, do like this,
- * where the function name is added as an extra, first argument.
- *         sco_virt(do_foo, o);
- *         sco_virt(do_bar, o);
- *
- * Or, to directly reach for the function pointer, and use it...
+ * To call a dynamically selected version instead, do like this.
  *         o->meta->virt.do_foo(o);
  *         o->meta->virt.do_bar(o);
  */
