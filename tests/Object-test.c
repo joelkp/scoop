@@ -24,10 +24,43 @@
 #include "Object-ExtendedThing.h"
 #include <stdio.h>
 
+/*
+ * Adding an extra type here with no exported symbols...
+ */
+
+#define StaticThing_ scoExtendedThing_
+#define StaticThing__ scoExtendedThing__
+_SCOclassdef(StaticThing);
+
+static void StaticThing_do_bar_(void *o) {
+	puts("do_bar (StaticThing version)");
+}
+
+static void StaticThing_dtor(StaticThing *o) {
+	puts("dtor (StaticThing is soon gone)");
+}
+
+static void StaticThing_virtinit(StaticThing_Meta *o)
+{
+	StaticThing_Virt *vt = &o->virt;
+	vt->do_bar = StaticThing_do_bar_; /* overridden */
+}
+
+_SCOmetainst(StaticThing, scoExtendedThing,
+		StaticThing_dtor, StaticThing_virtinit);
+_SCOctordec(StaticThing, StaticThing, (StaticThing *o)); /* optional here */
+_SCOctordef(StaticThing, StaticThing, (StaticThing *o), (o), o) {
+	sco_ExtendedThing_ctor(o);
+	return 1;
+}
+
+static StaticThing sthing; /* let's make it global, too */
+
 int main()
 {
 	scoThing *thing = sco_Thing_new(0);
 	scoExtendedThing *ething = sco_ExtendedThing_new(0);
+	StaticThing_new(&sthing);
 
 	/* RTTI and virtual function tests.
 	 */
@@ -43,6 +76,7 @@ int main()
 	ething->meta->virt.do_foo(ething);
 	ething->meta->virt.do_bar(ething);
 	ething->meta->virt.do_baz(ething, 2, "aaa", "bbb");
+	sthing.meta->virt.do_bar(&sthing);
 
 	/* Recreate fresh scoThing instance reusing the same memory
 	 * allocation.
@@ -57,6 +91,7 @@ int main()
 	 */
 	sco_delete(thing);
 	sco_delete(ething);
+	sco_finalize(&sthing); /* this one will print something... */
 
 	return 0;
 }
