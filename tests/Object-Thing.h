@@ -42,7 +42,7 @@
 
 SCOclassdef(scoThing);
 
-SCOctordec(scoThing, sco_Thing, (SCO_TYPE *o));
+SCOctordec(scoThing, sco_Thing,, (SCO_TYPE *o));
 
 /*
  * The scoThing versions of virtual functions, for direct calls.

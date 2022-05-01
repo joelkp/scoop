@@ -198,6 +198,12 @@ SCO__COMMA_ON_ARGS( \
 	SCO__INVERT_COMMA(SCO_CONCAT5(SCO__IS_EMPTY_CASE_, _0, _1, _2, _3))
 #define SCO__TRIGGER_PARENTHESIS_(...) ,
 
+/** Return first of one or more macro arguments. */
+#define SCO_ARGS_HEAD(head, ...) head
+
+/** Return arguments after first macro argument. */
+#define SCO_ARGS_TAIL(head, ...) __VA_ARGS__
+
 #ifdef __cplusplus
 }
 #endif

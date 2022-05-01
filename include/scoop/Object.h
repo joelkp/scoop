@@ -219,8 +219,10 @@ SCOmetatype(Class)
 
 /** Use to declare a pair of allocation and constructor functions for a
   * class if they do not take variable arguments. They will be named
-  * FunctionName_new() and FunctionName_ctor(), and both functions take
-  * the exact same arguments, the parameters given by \p Parlist.
+  * FunctionName_new() and FunctionName_ctor() for \p FunctionName
+  * (if \p NameSuffix is empty), and both functions take exactly the
+  * the same arguments, the parameters given by \p Parlist.
+  *
   * Any number of these function pairs may be declared and defined.
   *
   * \ref SCOctordef() is used to define an allocation/construction
@@ -228,15 +230,18 @@ SCOmetatype(Class)
   *
   * \see SCOctordef() for further details.
   */
-#define SCOctordec(Class, FunctionName, Parlist) \
-SCO_USERAPI Class* FunctionName##_new Parlist; \
-SCO_USERAPI unsigned char FunctionName##_ctor Parlist
+#define SCOctordec(Class, FunctionName, NameSuffix, Parlist) \
+SCO_USERAPI Class* FunctionName##_new##NameSuffix Parlist; \
+SCO_USERAPI unsigned char FunctionName##_ctor##NameSuffix Parlist
 
 /** Use to define a pair of allocation and constructor functions for a
-  * class if they do not take variable arguments. Both functions take
-  * the exact same arguments, given by \p Arglist. This is mirrored in
-  * \p Parlist, which should be \p Arglist without types, used for
-  * calling the FunctionName_ctor() function.
+  * class if they do not take variable arguments. They will be named
+  * FunctionName_new() and FunctionName_ctor() for \p FunctionName
+  * (if \p NameSuffix is empty), and both functions take exactly the
+  * same arguments, the parameters given by \p Parlist. \p Arglist is
+  * used to pass arguments from one of them to the other, and should
+  * be \p Parlist without types. The object pointer, whatever it is
+  * named, must come first in \p Arglist.
   *
   * The FunctionName_new() function will first allocate zero'd
   * memory if its memory pointer argument is zero, otherwise zero and
@@ -267,20 +272,21 @@ SCO_USERAPI unsigned char FunctionName##_ctor Parlist
   *
   * \see SCOctordec() for simply declaring them as in a header.
   */
-#define SCOctordef(Class, FunctionName, Parlist, Arglist, o) \
-unsigned char FunctionName##_ctor Parlist; \
-Class* FunctionName##_new Parlist \
+#define SCOctordef(Class, FunctionName, NameSuffix, Parlist, Arglist) \
+unsigned char FunctionName##_ctor##NameSuffix Parlist; \
+Class* FunctionName##_new##NameSuffix Parlist \
 { \
-	void *SCOctordef__mem = (o); \
-	(o) = sco_raw_new(SCOctordef__mem, sco_metaof(Class)); \
-	if ((o) && !FunctionName##_ctor Arglist) { \
-		sco_set_metaof((o), scoNone); \
-		if (!SCOctordef__mem) free(o); \
+	void *SCOctordef__mem = (SCO_ARGS_HEAD Arglist); \
+	if (((SCO_ARGS_HEAD Arglist) = \
+	     sco_raw_new(SCOctordef__mem, sco_metaof(Class))) != NULL && \
+	    !FunctionName##_ctor##NameSuffix Arglist) { \
+		sco_set_metaof((SCO_ARGS_HEAD Arglist), scoNone); \
+		if (!SCOctordef__mem) free((SCO_ARGS_HEAD Arglist)); \
 		return 0; \
 	} \
-	return (o); \
+	return (SCO_ARGS_HEAD Arglist); \
 } \
-unsigned char FunctionName##_ctor Parlist
+unsigned char FunctionName##_ctor##NameSuffix Parlist
 
 /** Define the global instance of the meta type for the class.
   * (You can use the keyword \a static before invoking this macro when not

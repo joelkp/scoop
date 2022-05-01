@@ -60,7 +60,7 @@ static void scoExtendedThing_virtinit(scoExtendedThing_Meta *o)
 }
 SCOmetainst(scoExtendedThing, scoThing, 0, scoExtendedThing_virtinit);
 
-SCOctordef(scoExtendedThing, sco_ExtendedThing, (scoExtendedThing *o), (o), o)
+SCOctordef(scoExtendedThing, sco_ExtendedThing,, (scoExtendedThing *o), (o))
 {
 	sco_Thing_ctor(o);
 	o->y = 42.f;

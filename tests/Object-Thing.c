@@ -47,7 +47,7 @@ static void scoThing_virtinit(scoThing_Meta *o)
 }
 SCOmetainst(scoThing, scoNone, 0, scoThing_virtinit);
 
-SCOctordef(scoThing, sco_Thing, (scoThing *o), (o), o)
+SCOctordef(scoThing, sco_Thing,, (scoThing *o), (o))
 {
 	o->x = 10;
 	return 1;
