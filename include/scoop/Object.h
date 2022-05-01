@@ -219,8 +219,10 @@ SCOmetatype(Class)
 
 /** Use to declare a pair of allocation and constructor functions for a
   * class if they do not take variable arguments. They will be named
-  * FunctionName_new() and FunctionName_ctor(), and both functions take
-  * the exact same arguments, the parameters given by \p Parlist.
+  * FunctionName_new() and FunctionName_ctor() for \p FunctionName,
+  * and both functions take exactly the same arguments, the parameters
+  * given by \p Parlist.
+  *
   * Any number of these function pairs may be declared and defined.
   *
   * \ref SCOctordef() is used to define an allocation/construction
@@ -233,10 +235,12 @@ SCO_USERAPI Class* FunctionName##_new Parlist; \
 SCO_USERAPI unsigned char FunctionName##_ctor Parlist
 
 /** Use to define a pair of allocation and constructor functions for a
-  * class if they do not take variable arguments. Both functions take
-  * the exact same arguments, given by \p Arglist. This is mirrored in
-  * \p Parlist, which should be \p Arglist without types, used for
-  * calling the FunctionName_ctor() function.
+  * class if they do not take variable arguments. They will be named
+  * FunctionName_new() and FunctionName_ctor() for \p FunctionName,
+  * and both functions take exactly the same arguments, the parameters
+  * given by \p Parlist. \p Arglist is used to pass arguments from one of
+  * them to the other, and should be \p Parlist without types. The last
+  * argument \o must be the name used in \p Arglist for the object pointer.
   *
   * The FunctionName_new() function will first allocate zero'd
   * memory if its memory pointer argument is zero, otherwise zero and
