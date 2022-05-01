@@ -218,6 +218,16 @@ SCOclasstype(Class); \
 SCOmetatype(Class)
 
 /** Use to declare a pair of allocation and constructor functions for a
+  * class if they do not take variable arguments. This version is used
+  * to forward-declare a static pair (not part of any visible API).
+  *
+  * \see SCOctordec()
+  */
+#define _SCOctordec(Class, FunctionName, NameSuffix, Parlist) \
+static Class* FunctionName##_new##NameSuffix Parlist; \
+static inline unsigned char FunctionName##_ctor##NameSuffix Parlist
+
+/** Use to declare a pair of allocation and constructor functions for a
   * class if they do not take variable arguments. They will be named
   * FunctionName_new() and FunctionName_ctor() for \p FunctionName
   * (if \p NameSuffix is empty), and both functions take exactly the
@@ -228,11 +238,33 @@ SCOmetatype(Class)
   * \ref SCOctordef() is used to define an allocation/construction
   * function pair, whether or not it was forward-declared using this.
   *
-  * \see SCOctordef() for further details.
+  * See \ref SCOctordef() for further details.
   */
 #define SCOctordec(Class, FunctionName, NameSuffix, Parlist) \
 SCO_USERAPI Class* FunctionName##_new##NameSuffix Parlist; \
 SCO_USERAPI unsigned char FunctionName##_ctor##NameSuffix Parlist
+
+/** Use to define a pair of allocation and constructor functions for a
+  * class if they do not take variable arguments. This version is used
+  * to for a static pair (not part of any visible API).
+  *
+  * \see SCOctordef()
+  */
+#define _SCOctordef(Class, FunctionName, NameSuffix, Parlist, Arglist) \
+static inline unsigned char FunctionName##_ctor##NameSuffix Parlist; \
+static Class* FunctionName##_new##NameSuffix Parlist \
+{ \
+	void *SCOctordef__mem = (SCO_ARGS_HEAD Arglist); \
+	if (((SCO_ARGS_HEAD Arglist) = \
+	     sco_raw_new(SCOctordef__mem, sco_metaof(Class))) != NULL && \
+	    !FunctionName##_ctor##NameSuffix Arglist) { \
+		sco_set_metaof((SCO_ARGS_HEAD Arglist), scoNone); \
+		if (!SCOctordef__mem) free((SCO_ARGS_HEAD Arglist)); \
+		return 0; \
+	} \
+	return (SCO_ARGS_HEAD Arglist); \
+} \
+static inline unsigned char FunctionName##_ctor##NameSuffix Parlist
 
 /** Use to define a pair of allocation and constructor functions for a
   * class if they do not take variable arguments. They will be named
@@ -289,8 +321,13 @@ Class* FunctionName##_new##NameSuffix Parlist \
 unsigned char FunctionName##_ctor##NameSuffix Parlist
 
 /** Define the global instance of the meta type for the class.
-  * (You can use the keyword \a static before invoking this macro when not
-  * defining a class part of a public API.)
+  * This version makes the symbol static (not part of a public API).
+  *
+  * \see SCOmetainst()
+  */
+#define _SCOmetainst static SCOmetainst
+
+/** Define the global instance of the meta type for the class.
   *
   * \p Superclass should be \a scoNone for base classes, otherwise the name
   * of the superclass.
