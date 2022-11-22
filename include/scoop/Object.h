@@ -254,15 +254,15 @@ SCO_USERAPI unsigned char FunctionName##_ctor##NameSuffix Parlist
 static inline unsigned char FunctionName##_ctor##NameSuffix Parlist; \
 static Class* FunctionName##_new##NameSuffix Parlist \
 { \
-	void *SCOctordef__mem = (SCO_ARGS_HEAD Arglist); \
-	if (((SCO_ARGS_HEAD Arglist) = \
+	void *SCOctordef__mem = (SCO_ARG1 Arglist); \
+	if (((SCO_ARG1 Arglist) = \
 	     sco_raw_new(SCOctordef__mem, sco_metaof(Class))) != NULL && \
 	    !FunctionName##_ctor##NameSuffix Arglist) { \
-		sco_set_metaof((SCO_ARGS_HEAD Arglist), scoNone); \
-		if (!SCOctordef__mem) free((SCO_ARGS_HEAD Arglist)); \
+		sco_set_metaof((SCO_ARG1 Arglist), scoNone); \
+		if (!SCOctordef__mem) free((SCO_ARG1 Arglist)); \
 		return 0; \
 	} \
-	return (SCO_ARGS_HEAD Arglist); \
+	return (SCO_ARG1 Arglist); \
 } \
 static inline unsigned char FunctionName##_ctor##NameSuffix Parlist
 
@@ -308,15 +308,15 @@ static inline unsigned char FunctionName##_ctor##NameSuffix Parlist
 unsigned char FunctionName##_ctor##NameSuffix Parlist; \
 Class* FunctionName##_new##NameSuffix Parlist \
 { \
-	void *SCOctordef__mem = (SCO_ARGS_HEAD Arglist); \
-	if (((SCO_ARGS_HEAD Arglist) = \
+	void *SCOctordef__mem = (SCO_ARG1 Arglist); \
+	if (((SCO_ARG1 Arglist) = \
 	     sco_raw_new(SCOctordef__mem, sco_metaof(Class))) != NULL && \
 	    !FunctionName##_ctor##NameSuffix Arglist) { \
-		sco_set_metaof((SCO_ARGS_HEAD Arglist), scoNone); \
-		if (!SCOctordef__mem) free((SCO_ARGS_HEAD Arglist)); \
+		sco_set_metaof((SCO_ARG1 Arglist), scoNone); \
+		if (!SCOctordef__mem) free((SCO_ARG1 Arglist)); \
 		return 0; \
 	} \
-	return (SCO_ARGS_HEAD Arglist); \
+	return (SCO_ARG1 Arglist); \
 } \
 unsigned char FunctionName##_ctor##NameSuffix Parlist
 
@@ -425,11 +425,9 @@ _SCOmetatype(scoObject);
  * versions of virtual functions, but is not needed to make such
  * calls. It can only be used for functions which have this form
  * and include the object pointer as the first parameter.
- *
- * This macro is limited to functions with at most 16 arguments.
  */
-#define sco_virt(func, o, ...) \
-	((o)->meta->virt.func((o) SCO_COMMA_ON_ARGS(__VA_ARGS__) __VA_ARGS__))
+#define sco_virt(func, ...) \
+	(SCO_ARG1(__VA_ARGS__))->meta->virt.func(__VA_ARGS__)
 
 /** Allocation method used in instance construction functions,
   * typically in the wrapper around the initialization
