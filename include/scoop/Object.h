@@ -416,18 +416,28 @@ _SCOmetatype(scoObject);
 #define sco_set_metaof(mem, Class) \
 	((void)(((scoObject*)mem)->meta = (scoObject_Meta*)sco_metaof(Class)))
 
-/*
- * Call a virtual method named \p func belonging to the
- * class instance \p o and pass \p o as the first argument,
- * any other arguments following.
- *
- * This macro is meant to simplify calls to dynamically selected
- * versions of virtual functions, but is not needed to make such
- * calls. It can only be used for functions which have this form
- * and include the object pointer as the first parameter.
- */
+/** Call a virtual method named \p func belonging to the
+  * class instance given by the second argument, passing
+  * the instance, and any additional arguments after it.
+  *
+  * This convenience macro is meant to simplify calls to
+  * dynamically selected versions of functions. When the
+  * function doesn't take an object pointer as its first
+  * argument, \ref sco_svirt() can instead be used.
+  */
 #define sco_virt(func, ...) \
 	(SCO_ARG1(__VA_ARGS__))->meta->virt.func(__VA_ARGS__)
+
+/** Call a static virtual method named \p func belonging to the
+  * class instance given by the second argument. Only arguments
+  * after the second argument, if any, are passed for the call.
+  *
+  * This convenience macro is for virtual functions which don't
+  * take the object pointer as their first parameter. Otherwise
+  * it is the same as \ref sco_virt().
+  */
+#define sco_svirt(func, ...) \
+	(SCO_ARG1(__VA_ARGS__))->meta->virt.func(SCO_ARGS_TAIL(__VA_ARGS__))
 
 /** Allocation method used in instance construction functions,
   * typically in the wrapper around the initialization
@@ -474,25 +484,24 @@ SCO_API void sco_finalize(void *o);
 SCO_API int sco_rtticheck(const void *submeta, const void *meta);
 
 /** Checks if the named \p Subclass is a subclass of the named \p Class.
-  * Returns 1 if subclass, 0 if same class, -1 if neither.
-  */
+    Returns 1 if subclass, 0 if same class, -1 if neither. */
 #define sco_subclass(Subclass, Class) \
 	sco_rtticheck(sco_metaof(Subclass), sco_metaof(Class))
 
 /** Checks if the named \p Superclass is a superclass of the named \p Class.
-  * Returns 1 if superclass, 0 if same class, -1 if neither.
-  */
+    Returns 1 if superclass, 0 if same class, -1 if neither. */
 #define sco_superclass(Superclass, Class) \
 	sco_rtticheck(sco_metaof(Class), sco_metaof(Superclass))
 
-/** Checks if \p o is an instance of \p Class or of a class derived
-    from it. */
+/** Checks if \p o is an instance of \p Class or of a class derived from it.
+    Returns 1 if such an instance, 0 if not. */
 #define sco_of_class(o, Class) \
-	(sco_rtticheck((o)->meta, sco_metaof(Class)) >= 0)
+	(sco_rtticheck(((scoObject*)(o))->meta, sco_metaof(Class)) >= 0)
 
-/** Checks if \p o is of a type derived from \p Class. */
+/** Checks if \p o is of a type derived from \p Class.
+    Returns 1 if such an instance, 0 if not. */
 #define sco_of_subclass(o, Class) \
-	(sco_rtticheck((o)->meta, sco_metaof(Class)) > 0)
+	(sco_rtticheck(((scoObject*)(o))->meta, sco_metaof(Class)) > 0)
 
 #ifdef __cplusplus
 }
