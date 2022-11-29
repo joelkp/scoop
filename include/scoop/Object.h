@@ -458,25 +458,24 @@ SCO_API void sco_finalize(void *o);
 SCO_API int sco_rtticheck(const void *submeta, const void *meta);
 
 /** Checks if the named \p Subclass is a subclass of the named \p Class.
-  * Returns 1 if subclass, 0 if same class, -1 if neither.
-  */
+    Returns 1 if subclass, 0 if same class, -1 if neither. */
 #define sco_subclass(Subclass, Class) \
 	sco_rtticheck(sco_metaof(Subclass), sco_metaof(Class))
 
 /** Checks if the named \p Superclass is a superclass of the named \p Class.
-  * Returns 1 if superclass, 0 if same class, -1 if neither.
-  */
+    Returns 1 if superclass, 0 if same class, -1 if neither. */
 #define sco_superclass(Superclass, Class) \
 	sco_rtticheck(sco_metaof(Class), sco_metaof(Superclass))
 
-/** Checks if \p o is an instance of \p Class or of a class derived
-    from it. */
+/** Checks if \p o is an instance of \p Class or of a class derived from it.
+    Returns 1 if such an instance, 0 if not. */
 #define sco_of_class(o, Class) \
-	(sco_rtticheck((o)->meta, sco_metaof(Class)) >= 0)
+	(sco_rtticheck(((scoObject*)(o))->meta, sco_metaof(Class)) >= 0)
 
-/** Checks if \p o is of a type derived from \p Class. */
+/** Checks if \p o is of a type derived from \p Class.
+    Returns 1 if such an instance, 0 if not. */
 #define sco_of_subclass(o, Class) \
-	(sco_rtticheck((o)->meta, sco_metaof(Class)) > 0)
+	(sco_rtticheck(((scoObject*)(o))->meta, sco_metaof(Class)) > 0)
 
 #ifdef __cplusplus
 }
