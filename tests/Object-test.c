@@ -22,15 +22,16 @@
  */
 
 #include "Object-ExtendedThing.h"
+#include <scoop/mempool.h>
 #include <stdio.h>
 
 /*
  * Adding an extra type here with no exported symbols...
  */
 
-#define StaticThing_ scoExtendedThing_
-#define StaticThing__ scoExtendedThing__
-_SCOclassdef(StaticThing);
+#define StaticThing_C_ scoExtendedThing_C_
+#define StaticThing_V_ scoExtendedThing_V_
+SCOclassdef_(StaticThing)
 
 static void StaticThing_do_bar_(void *o) {
 	puts("do_bar (StaticThing version)");
@@ -46,10 +47,10 @@ static void StaticThing_virtinit(StaticThing_Meta *o)
 	vt->do_bar = StaticThing_do_bar_; /* overridden */
 }
 
-_SCOmetainst(StaticThing, scoExtendedThing,
-		StaticThing_dtor, StaticThing_virtinit);
-_SCOctordec(StaticThing, StaticThing,, (StaticThing *o)); /* optional here */
-_SCOctordef(StaticThing, StaticThing,, (StaticThing *o), (o)) {
+SCOmetainst_(StaticThing, scoExtendedThing,
+		StaticThing_dtor, StaticThing_virtinit)
+SCOctordec_(StaticThing,,, (StaticThing *o)) /* optional here */
+SCOctordef_(StaticThing,,, (StaticThing *o), (o)) {
 	sco_ExtendedThing_ctor(o);
 	return 1;
 }
@@ -58,9 +59,17 @@ static StaticThing sthing; /* let's make it global, too */
 
 int main()
 {
+	/* Ordinary dynamic and static allocation.
+	 */
 	scoThing *thing = sco_Thing_new(0);
 	scoExtendedThing *ething = sco_ExtendedThing_new(0);
 	StaticThing_new(&sthing);
+
+	/* Allocation using mempool.
+	 * Any "mpnew" object lives as long as the mempool.
+	 */
+	scoMempool *mp = sco_create_Mempool(0);
+	scoThing *thing_mp = sco_Thing_mpnew(mp);
 
 	/* RTTI and virtual function tests.
 	 */
@@ -86,8 +95,12 @@ int main()
 	if (sco_Thing_ctor(thing))
 		puts("'thing' reconstructed");
 
-	/* Not necessary as OS cleans up memory at program exit, but included
-	 * for testing.
+	/* This would run any associated destructor...
+	 */
+	sco_destroy_Mempool(mp);
+
+	/* All this clean-up is not strictly necessary as the OS cleans up
+	 * memory at program exit, but it's included so as to demonstrate.
 	 */
 	sco_delete(thing);
 	sco_delete(ething);

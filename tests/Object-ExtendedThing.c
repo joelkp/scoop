@@ -58,7 +58,7 @@ static void scoExtendedThing_virtinit(scoExtendedThing_Meta *o)
 	vt->do_foo = sco_ExtendedThing_do_foo_; /* overridden */
 	vt->do_baz = sco_ExtendedThing_do_baz_;
 }
-SCOmetainst(scoExtendedThing, scoThing, 0, scoExtendedThing_virtinit);
+SCOmetainst(scoExtendedThing, scoThing, 0, scoExtendedThing_virtinit)
 
 SCOctordef(scoExtendedThing, sco_ExtendedThing,, (scoExtendedThing *o), (o))
 {

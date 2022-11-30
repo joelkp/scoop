@@ -33,16 +33,16 @@
  * functions.
  */
 
-#define scoThing_ \
+#define scoThing_C_ scoObject_C_ \
 	int x;
 
-#define scoThing__ \
+#define scoThing_V_ scoObject_V_ \
 	void (*do_foo)(SCO_TYPE *o); \
 	void (*do_bar)(SCO_TYPE *o);
 
-SCOclassdef(scoThing);
+SCOclassdef(scoThing)
 
-SCOctordec(scoThing, sco_Thing,, (SCO_TYPE *o));
+SCOctordec(scoThing, sco_Thing,, (SCO_TYPE *o))
 
 /*
  * The scoThing versions of virtual functions, for direct calls.

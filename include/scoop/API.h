@@ -35,6 +35,10 @@ extern "C" {
  * Common API declarations made available to all source and header files.
  */
 
+/** Type used instead of bool in APIs to ensure binary compatibility between
+    C and C++ given that real bool possibly has different size in C and C++. */
+typedef unsigned char scoFakeBool;
+
 #if defined(_WIN32) && !defined(WIN32)
 # define WIN32
 #endif
@@ -76,6 +80,19 @@ extern "C" {
  * is defined blank.
  */
 # define SCO_USERAPI
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+# define scoMalloclike __attribute__((malloc))
+# define scoMaybeUnused __attribute__((unused))
+# define scoNoinline __attribute__((noinline))
+# define scoPrintflike(string_index, first_to_check) \
+	__attribute__((format(printf, string_index, first_to_check)))
+#else
+# define scoMalloclike
+# define scoMaybeUnused
+# define scoNoinline
+# define scoPrintflike(string_index, first_to_check)
 #endif
 
 /**
@@ -176,17 +193,17 @@ SCO_API extern void (*sco_fatal)(const char *msg, ...);
 #define SCO_STREXP(arg) SCO_STRLIT(arg)
 
 /** Concatenate the text of two arguments before macro-expanding them. */
-#define SCO_CONCAT(_0, _1) _0 ## _1
+#define SCO_CAT(_0, _1) _0 ## _1
 
 /** Concatenate the text of two arguments after macro-expanding them. */
-#define SCO_PASTE(_0, _1) SCO_CONCAT(_0, _1)
+#define SCO_PASTE(_0, _1) SCO_CAT(_0, _1)
 
 /** Return all arguments. Can be used to remove parentheses around a list. */
 #define SCO_ARGS(...) __VA_ARGS__
 
 /** Return the first of one or more macro arguments. */
 #define SCO_ARG1(...) SCO__ARG1(__VA_ARGS__, )
-#define SCO__ARG1(_0, ...) _0
+#define SCO__ARG1(head, ...) head
 
 /** Return arguments after the first macro argument. */
 #define SCO_ARGS_TAIL(...) \
@@ -204,20 +221,28 @@ SCO_API extern void (*sco_fatal)(const char *msg, ...);
  * Check whether arguments include at least one comma,
  * i.e. there's more than one argument (blank or not).
  *
- * This version only works with fewer than 16 arguments.
+ * This version only works with fewer than 32 arguments.
  */
-#define SCO_HAS_COMMA(...) SCO__ARG16(__VA_ARGS__, \
+#define SCO_HAS_COMMA(...) SCO__ARG32(__VA_ARGS__, \
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, )
-#define SCO__ARG16(_0, _1, _2, _3, _4, _5, _6, _7, \
-		_8, _9, _10, _11, _12, _13, _14, _15, ...) _15
+#define SCO__ARG32(_0, \
+ _1, _2, _3, _4, _5, _6, _7, _8, _9,_10,_11,_12,_13,_14,_15,_16, \
+_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29,_30,_31, ...) _31
+
+/** Return \p cond if not empty, otherwise return \p repl. */
+#define SCO_NONEMPTY_OR(cond, repl) \
+	SCO_PASTE(SCO__NONEMPTY_OR, SCO_IS_EMPTY(cond))(cond, repl)
+#define SCO__NONEMPTY_OR0(cond, repl) cond
+#define SCO__NONEMPTY_OR1(cond, repl) repl
 
 /**
- * C99-compatible macro returning a comma if the argument list is not empty.
- * Derived from Jens Gustedt's empty macro arguments detection.
+ * C99-compatible empty macro arguments detection,
+ * using Jens Gustedt's technique.
  */
-#define SCO_COMMA_ON_ARGS(...) \
-/* test for empty argument in four ways, then invert result... */       \
-SCO__COMMA_ON_ARGS( \
+#define SCO_IS_EMPTY(...) \
+/* test for empty argument in four ways, then produce 1 or 0   */       \
+SCO__IS_EMPTY( \
 	/* if argument has comma (not just one arg, empty or not)? */   \
 	SCO_HAS_COMMA(__VA_ARGS__),                                     \
 	/* if _TRIGGER_PARENTHESIS_ and argument adds a comma? */       \
@@ -227,13 +252,10 @@ SCO__COMMA_ON_ARGS( \
 	/* if placed between _TRIGGER_PARENTHESIS_ and parentheses? */  \
 	SCO_HAS_COMMA(SCO__TRIGGER_PARENTHESIS_ __VA_ARGS__ (/*empty*/))\
 )
-#define SCO__ARG3(_0, _1, _2, ...) _2
 #define SCO__IS_EMPTY_CASE_0001 ,
-#define SCO_CONCAT5(_0, _1, _2, _3, _4) _0 ## _1 ## _2 ## _3 ## _4
-#define SCO__COMMA ,
-#define SCO__INVERT_COMMA(...) SCO__ARG3(__VA_ARGS__, , SCO__COMMA, )
-#define SCO__COMMA_ON_ARGS(_0, _1, _2, _3) \
-	SCO__INVERT_COMMA(SCO_CONCAT5(SCO__IS_EMPTY_CASE_, _0, _1, _2, _3))
+#define SCO_CAT5(_0, _1, _2, _3, _4) _0 ## _1 ## _2 ## _3 ## _4
+#define SCO__IS_EMPTY(_0, _1, _2, _3) \
+	SCO_HAS_COMMA(SCO_CAT5(SCO__IS_EMPTY_CASE_, _0, _1, _2, _3))
 #define SCO__TRIGGER_PARENTHESIS_(...) ,
 
 #ifdef __cplusplus

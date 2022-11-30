@@ -1,6 +1,6 @@
-/* Simple test program for the SCOOP Object module - ExtendedThing module
+/* SCOOP memory pool module (originally from saugns)
  *
- * Copyright (c) 2010, 2011, 2013, 2022 Joel K. Pettersson
+ * Copyright (c) 2014, 2018-2022 Joel K. Pettersson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -21,35 +21,35 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef Object_ExtendedThing_h
-#define Object_ExtendedThing_h
+#ifndef scoop_mempool_h
+#define scoop_mempool_h
+#ifndef SCO_API
+# include "API.h"
+#endif
+#include <stddef.h>
+#ifdef __cplusplus
+# define restrict /* nothing for now */
+extern "C" {
+#endif
 
-#include <scoop/BEGIN.h>
-#include "Object-Thing.h"
+struct scoMempool;
+typedef struct scoMempool scoMempool;
 
-/*
- * Declare ExtendedThing class. scoExtendedThing_ includes the scoThing_
- * member list (and adds to it), and scoExtendedThing__ includes the
- * scoThing__ virtual function list (in this case, without adding to it).
- */
+scoMempool *sco_create_Mempool(size_t start_size) scoMalloclike;
+void sco_destroy_Mempool(scoMempool *restrict o);
 
-#define scoExtendedThing_C_ scoThing_C_ \
-	float y;
+void *sco_mpalloc(scoMempool *restrict o, size_t size) scoMalloclike;
+void *sco_mpmemdup(scoMempool *restrict o,
+		const void *restrict src, size_t size) scoMalloclike;
+#ifndef SCO__DTOR_F_DEFINED
+# define SCO__DTOR_F_DEFINED
+typedef void (*scoDtor_f)(void *o);
+#endif
+scoFakeBool sco_mpregdtor(scoMempool *restrict o,
+		scoDtor_f func, void *restrict arg);
 
-#define scoExtendedThing_V_ scoThing_V_ \
-	void (*do_baz)(SCO_TYPE *o, int value, ...); \
-
-SCOclassdef(scoExtendedThing)
-
-SCOctordec(scoExtendedThing, sco_ExtendedThing,, (SCO_TYPE *o))
-
-/*
- * The scoExtendedThing versions of virtual functions, for direct calls.
- */
-
-void sco_ExtendedThing_do_foo_(SCO_TYPE *o);
-void sco_ExtendedThing_do_baz_(SCO_TYPE *o, int string_count, ...);
-
-#include <scoop/END.h>
-
+#ifdef __cplusplus
+}
+# undef restrict
+#endif
 #endif

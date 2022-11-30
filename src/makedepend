@@ -1,2 +1,4 @@
-Object.o: Object.c ../include/scoop/Object.h ../include/scoop/API.h
+mempool.o: mempool.c ../include/scoop/mempool.h ../include/scoop/API.h
+Object.o: Object.c ../include/scoop/Object.h ../include/scoop/API.h \
+ ../include/scoop/mempool.h
 error.o: error.c ../include/scoop/API.h

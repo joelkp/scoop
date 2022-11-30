@@ -27,6 +27,7 @@ CFLAGS		+= -DSCO_LIBRARY
 DSOCFLAGS	+= -DSCO_SHARED
 
 CFILES		= \
+		mempool.c \
 		Object.c \
 		error.c
 

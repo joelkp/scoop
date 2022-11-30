@@ -22,11 +22,17 @@
  */
 
 #include <scoop/Object.h>
+#include <scoop/mempool.h>
 #include <string.h>
+
+static void blank_destructor(void *meta)
+{
+	(void)meta; /* do nothing */
+}
 
 static void pure_virtual(void)
 {
-	sco_fatal("Error: pure virtual SCOOP method called!");
+	sco_fatal("Error: pure virtual method called!");
 }
 
 /* recursively fills in blank parts of meta type instance chain */
@@ -34,7 +40,7 @@ static void init_meta(scoObject_Meta *o)
 {
 	void (**virt)() = (void (**)()) &o->virt,
 			 (**super_virtab)() = 0;
-	unsigned int i = 1, max; /* skip dtor */
+	unsigned int i = 0, max;
 	if (o->super) {
 		if (!o->super->done)
 			init_meta((scoObject_Meta*)o->super);
@@ -44,7 +50,9 @@ static void init_meta(scoObject_Meta *o)
 	}
 	if (o->vtinit)
 		o->vtinit(o);
-	for (max = o->vnum; i < max; ++i)
+	if (i == 0)
+		if (!virt[i]) virt[i] = blank_destructor;
+	for (max = o->vnum; ++i < max; )
 		if (!virt[i]) virt[i] = pure_virtual;
 	o->done = 1;
 }
@@ -63,23 +71,33 @@ void* sco_raw_new(void *mem, void *_meta)
 	return mem;
 }
 
+void* sco_raw_mpnew(struct scoMempool *mp, void *_meta)
+{
+	scoObject_Meta *meta = _meta;
+	void *mem;
+	if (!(mem = sco_mpalloc(mp, meta->size)))
+		return 0;
+	if (!meta->done) init_meta(meta);
+	if (meta->virt.dtor != blank_destructor &&
+	    !sco_mpregdtor(mp, meta->virt.dtor, mem))
+		return 0;
+	sco_set_meta(mem, meta);
+	return mem;
+}
+
 void sco_delete(void *o)
 {
 	const scoObject_Meta *meta = sco_meta(o);
-	do {
-		if (meta->virt.dtor) meta->virt.dtor(o);
-		meta = meta->super;
-	} while (meta);
+	if (meta->virt.dtor != blank_destructor)
+		meta->virt.dtor(o);
 	free(o);
 }
 
 void sco_finalize(void *o)
 {
 	const scoObject_Meta *meta = sco_meta(o);
-	do {
-		if (meta->virt.dtor) meta->virt.dtor(o);
-		meta = meta->super;
-	} while (meta);
+	if (meta->virt.dtor != blank_destructor)
+		meta->virt.dtor(o);
 	sco_set_metaof(o, scoNone);
 }
 
